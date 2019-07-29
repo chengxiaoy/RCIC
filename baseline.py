@@ -24,7 +24,8 @@ import warnings
 warnings.filterwarnings('ignore')
 
 path_data = 'data'
-device = 'cuda'
+# device = 'cuda'
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 batch_size = 32
 torch.manual_seed(0)
 
