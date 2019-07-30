@@ -106,9 +106,9 @@ model.fc = torch.nn.Linear(num_ftrs, classes)
 #     new_conv.weight[:, :] = torch.stack([torch.mean(trained_kernel, 1)] * 6, dim=1)
 # model.conv1 = new_conv
 
-loader = D.DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=4)
-val_loader = D.DataLoader(ds_val, batch_size=batch_size, shuffle=True, num_workers=4)
-tloader = D.DataLoader(ds_test, batch_size=batch_size, shuffle=False, num_workers=4)
+loader = D.DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=16)
+val_loader = D.DataLoader(ds_val, batch_size=batch_size, shuffle=True, num_workers=16)
+tloader = D.DataLoader(ds_test, batch_size=batch_size, shuffle=False, num_workers=16)
 
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.0003)
