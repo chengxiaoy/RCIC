@@ -170,7 +170,7 @@ checkpoints = ModelCheckpoint('models', 'Model', save_interval=3, n_saved=3, cre
 trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoints, {'ResNet18': model})
 
 pbar = ProgressBar(bar_format='')
-pbar.attach(trainer, output_transform=lambda x: {'loss': x})
+# pbar.attach(trainer, output_transform=lambda x: {'loss': x})
 
 import os
 
