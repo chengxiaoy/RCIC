@@ -156,8 +156,8 @@ lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=10,
 
 @trainer.on(Events.EPOCH_COMPLETED)
 def update_lr_scheduler(engine):
-    # lr_scheduler.step(val_epoch[engine.state.epoch]['accuracy'])
-    lr_scheduler.step(engine.state.metrics['accuracy'])
+    lr_scheduler.step(val_epoch[engine.state.epoch]['accuracy'])
+    # lr_scheduler.step(engine.state.metrics['accuracy'])
     lr = float(optimizer.param_groups[0]['lr'])
     print("Learning rate: {}".format(lr))
 
