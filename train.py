@@ -6,7 +6,7 @@ from PIL import Image
 import torch
 import torch.nn as nn
 import torch.utils.data as D
-from torch.optim.lr_scheduler import ExponentialLR
+from torch.optim.lr_scheduler import ExponentialLR, ReduceLROnPlateau
 
 from torchvision import models, transforms as T
 import torchvision
@@ -53,18 +53,31 @@ class ImagesDS(D.Dataset):
         experiment, well, plate = self.records[index].experiment, self.records[index].well, self.records[index].plate
         return '/'.join([self.img_dir, self.mode, experiment, f'Plate{plate}', f'{well}_s{self.site}_w{channel}.png'])
 
-    def _transform(self, img):
-        trans = torchvision.transforms.Compose([
-            torchvision.transforms.Resize(224),
-            torchvision.transforms.ToTensor(),
-            # torchvision.transforms.Normalize()
-            # torchvision.transforms.RandomGrayscale(p=0.2),
-            # torchvision.transforms.RandomRotation(90),
-            # torchvision.transforms.RandomHorizontalFlip(0.5),
-            # torchvision.transforms.RandomVerticalFlip(0.5),
+    def _transform(self, img, mode):
+        if mode == 'train':
+            trans = torchvision.transforms.Compose([
+                torchvision.transforms.RandomCrop(224),
+                torchvision.transforms.ToTensor(),
+                # torchvision.transforms.Normalize()
+                # torchvision.transforms.RandomGrayscale(p=0.2),
+                # torchvision.transforms.RandomRotation(90),
+                # torchvision.transforms.RandomHorizontalFlip(0.5),
+                # torchvision.transforms.RandomVerticalFlip(0.5),
 
-        ])
-        img = trans(img)
+            ])
+            img = trans(img)
+        else:
+            trans = torchvision.transforms.Compose([
+                torchvision.transforms.CenterCrop(224),
+                torchvision.transforms.ToTensor(),
+                # torchvision.transforms.Normalize()
+                # torchvision.transforms.RandomGrayscale(p=0.2),
+                # torchvision.transforms.RandomRotation(90),
+                # torchvision.transforms.RandomHorizontalFlip(0.5),
+                # torchvision.transforms.RandomVerticalFlip(0.5),
+
+            ])
+            img = trans(img)
         return img
 
     def __getitem__(self, index):
@@ -75,9 +88,9 @@ class ImagesDS(D.Dataset):
         img = rio.load_site_as_rgb(self.mode, experiment, plate, well, np.random.choice([1, 2]))
         img = Image.fromarray(img.astype(np.uint8))
 
-        img = self._transform(img)
+        img = self._transform(img, self.mode)
 
-        if self.mode == 'train':
+        if self.mode == 'train' or self.mode == 'val':
             return img, int(self.records[index].sirna)
         else:
             return img, self.records[index].id_code
@@ -91,7 +104,7 @@ df_train, df_val = train_test_split(df, test_size=0.035, stratify=df.sirna, rand
 df_test = pd.read_csv(path_data + '/test.csv')
 
 ds = ImagesDS(df_train, path_data, mode='train')
-ds_val = ImagesDS(df_val, path_data, mode='train')
+ds_val = ImagesDS(df_val, path_data, mode='val')
 ds_test = ImagesDS(df_test, path_data, mode='test')
 
 classes = 1108
@@ -121,23 +134,29 @@ metrics = {
 trainer = create_supervised_trainer(model, optimizer, criterion, device=device)
 val_evaluator = create_supervised_evaluator(model, metrics=metrics, device=device)
 
+val_epoch = {}
+
 
 @trainer.on(Events.EPOCH_COMPLETED)
 def compute_and_display_val_metrics(engine):
     epoch = engine.state.epoch
     metrics = val_evaluator.run(val_loader).metrics
+    val_epoch[epoch] = metrics
     print("Validation Results - Epoch: {}  Average Loss: {:.4f} | Accuracy: {:.4f} "
           .format(engine.state.epoch,
                   metrics['loss'],
                   metrics['accuracy']))
 
 
-lr_scheduler = ExponentialLR(optimizer, gamma=0.95)
+# lr_scheduler = ExponentialLR(optimizer, gamma=0.95)
+lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=10,
+                                 verbose=True)
 
 
 @trainer.on(Events.EPOCH_COMPLETED)
 def update_lr_scheduler(engine):
-    lr_scheduler.step()
+    # lr_scheduler.step(val_epoch[engine.state.epoch]['accuracy'])
+    lr_scheduler.step(engine.state.metrics['accuracy'])
     lr = float(optimizer.param_groups[0]['lr'])
     print("Learning rate: {}".format(lr))
 
@@ -167,7 +186,7 @@ def turn_on_layers(engine):
 
 
 checkpoints = ModelCheckpoint('models', 'Model', save_interval=3, n_saved=3, create_dir=True)
-trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoints, {'ResNet18': model})
+trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoints, {'ResNet34': model})
 
 pbar = ProgressBar(bar_format='')
 # pbar.attach(trainer, output_transform=lambda x: {'loss': x})
@@ -177,7 +196,7 @@ import os
 if not 'KAGGLE_WORKING_DIR' in os.environ:  # If we are not on kaggle server
     from ignite.contrib.handlers.tensorboard_logger import *
 
-    tb_logger = TensorboardLogger("board/ResNet18")
+    tb_logger = TensorboardLogger("board/ResNet34")
     tb_logger.attach(trainer, log_handler=OutputHandler(tag="training", output_transform=lambda loss: {'loss': loss}),
                      event_name=Events.ITERATION_COMPLETED)
 
