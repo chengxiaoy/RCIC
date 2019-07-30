@@ -168,7 +168,7 @@ trainer.run(loader, max_epochs=50)
 model.eval()
 with torch.no_grad():
     preds = np.empty(0)
-    for x, _ in tqdm_notebook(tloader):
+    for x, _ in tloader:
         x = x.to(device)
         output = model(x)
         idx = output.max(dim=-1)[1].cpu().numpy()
