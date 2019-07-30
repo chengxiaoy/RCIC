@@ -16,12 +16,13 @@ from ignite.metrics import Loss, Accuracy
 from ignite.contrib.handlers.tqdm_logger import ProgressBar
 from ignite.handlers import EarlyStopping, ModelCheckpoint
 
-from tqdm import tqdm_notebook
+from tqdm import tqdm
 
 from sklearn.model_selection import train_test_split
 
 import warnings
 import sys
+
 sys.path.append('rxrx1-utils')
 import rxrx.io as rio
 
@@ -194,7 +195,7 @@ trainer.run(loader, max_epochs=50)
 model.eval()
 with torch.no_grad():
     preds = np.empty(0)
-    for x, _ in tqdm_notebook(tloader):
+    for x, _ in tqdm(tloader):
         x = x.to(device)
         output = model(x)
         idx = output.max(dim=-1)[1].cpu().numpy()
