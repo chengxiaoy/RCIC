@@ -110,7 +110,7 @@ ds_test = ImagesDS(df_test, path_data, mode='test')
 
 classes = 1108
 model = models.resnet34(pretrained=True)
-model.load_state_dict(torch.load('Model_ResNet34_45.pth'))
+model.load_state_dict(torch.load('models/Model_ResNet34_45.pth'))
 
 num_ftrs = model.fc.in_features
 model.fc = torch.nn.Linear(num_ftrs, classes)
