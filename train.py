@@ -171,17 +171,17 @@ def update_lr_scheduler(engine):
 @trainer.on(Events.EPOCH_STARTED)
 def turn_on_layers(engine):
     epoch = engine.state.epoch
+    # if epoch == 1:
+    #     for name, child in model.named_children():
+    #         if name == 'fc':
+    #             pbar.log_message(name + ' is unfrozen')
+    #             for param in child.parameters():
+    #                 param.requires_grad = True
+    #         else:
+    #             pbar.log_message(name + ' is frozen')
+    #             for param in child.parameters():
+    #                 param.requires_grad = False
     if epoch == 1:
-        for name, child in model.named_children():
-            if name == 'fc':
-                pbar.log_message(name + ' is unfrozen')
-                for param in child.parameters():
-                    param.requires_grad = True
-            else:
-                pbar.log_message(name + ' is frozen')
-                for param in child.parameters():
-                    param.requires_grad = False
-    if epoch == 3:
         pbar.log_message("Turn on all the layers")
         for name, child in model.named_children():
             for param in child.parameters():
@@ -189,7 +189,7 @@ def turn_on_layers(engine):
 
 
 checkpoints = ModelCheckpoint('models', 'Model', save_interval=3, n_saved=3, create_dir=True)
-trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoints, {'ResNet34': model})
+trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoints, {'ResNet34_2': model})
 
 pbar = ProgressBar(bar_format='')
 # pbar.attach(trainer, output_transform=lambda x: {'loss': x})
@@ -199,7 +199,7 @@ import os
 if not 'KAGGLE_WORKING_DIR' in os.environ:  # If we are not on kaggle server
     from ignite.contrib.handlers.tensorboard_logger import *
 
-    tb_logger = TensorboardLogger("board/ResNet34")
+    tb_logger = TensorboardLogger("board/ResNet34_2")
     tb_logger.attach(trainer, log_handler=OutputHandler(tag="training", output_transform=lambda loss: {'loss': loss}),
                      event_name=Events.ITERATION_COMPLETED)
 
