@@ -109,12 +109,12 @@ ds_val = ImagesDS(df_val, path_data, mode='train')
 ds_test = ImagesDS(df_test, path_data, mode='test')
 
 classes = 1108
-model = models.resnet34(pretrained=True)
+model = models.resnet101(pretrained=True)
 num_ftrs = model.fc.in_features
 model.fc = torch.nn.Linear(num_ftrs, classes)
 
 
-model.load_state_dict(torch.load('models/Model_ResNet34_3_48.pth'))
+# model.load_state_dict(torch.load('models/Model_ResNet34_3_48.pth'))
 # let's make our model work with 6 channels
 # trained_kernel = model.conv1.weight
 # new_conv = nn.Conv2d(6, 64, kernel_size=7, stride=2, padding=3, bias=False)
@@ -127,7 +127,7 @@ val_loader = D.DataLoader(ds_val, batch_size=batch_size, shuffle=True, num_worke
 tloader = D.DataLoader(ds_test, batch_size=batch_size, shuffle=False, num_workers=16)
 
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.0003)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 metrics = {
     'loss': Loss(criterion),
@@ -189,7 +189,7 @@ def turn_on_layers(engine):
 
 
 checkpoints = ModelCheckpoint('models', 'Model', save_interval=3, n_saved=3, create_dir=True,require_empty=False)
-trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoints, {'ResNet34_3': model})
+trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoints, {'ResNet101': model})
 
 pbar = ProgressBar(bar_format='')
 # pbar.attach(trainer, output_transform=lambda x: {'loss': x})
@@ -199,7 +199,7 @@ import os
 if not 'KAGGLE_WORKING_DIR' in os.environ:  # If we are not on kaggle server
     from ignite.contrib.handlers.tensorboard_logger import *
 
-    tb_logger = TensorboardLogger("board/ResNet34_3")
+    tb_logger = TensorboardLogger("board/ResNet101")
     tb_logger.attach(trainer, log_handler=OutputHandler(tag="training", output_transform=lambda loss: {'loss': loss}),
                      event_name=Events.ITERATION_COMPLETED)
 
@@ -212,7 +212,7 @@ if not 'KAGGLE_WORKING_DIR' in os.environ:  # If we are not on kaggle server
     tb_logger.attach(trainer, log_handler=GradsHistHandler(model), event_name=Events.EPOCH_COMPLETED)
     tb_logger.close()
 
-# trainer.run(loader, max_epochs=50)
+trainer.run(loader, max_epochs=100)
 
 model.eval()
 with torch.no_grad():
