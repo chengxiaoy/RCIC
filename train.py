@@ -152,7 +152,7 @@ def compute_and_display_val_metrics(engine):
 
 
 # lr_scheduler = ExponentialLR(optimizer, gamma=0.95)
-lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5,
+lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.3, patience=5,
                                  verbose=True)
 
 
@@ -189,7 +189,7 @@ def turn_on_layers(engine):
 
 
 checkpoints = ModelCheckpoint('models', 'Model', save_interval=3, n_saved=3, create_dir=True,require_empty=False)
-trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoints, {'ResNet34_2': model})
+trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoints, {'ResNet34_3': model})
 
 pbar = ProgressBar(bar_format='')
 # pbar.attach(trainer, output_transform=lambda x: {'loss': x})
@@ -199,7 +199,7 @@ import os
 if not 'KAGGLE_WORKING_DIR' in os.environ:  # If we are not on kaggle server
     from ignite.contrib.handlers.tensorboard_logger import *
 
-    tb_logger = TensorboardLogger("board/ResNet34_2")
+    tb_logger = TensorboardLogger("board/ResNet34_3")
     tb_logger.attach(trainer, log_handler=OutputHandler(tag="training", output_transform=lambda loss: {'loss': loss}),
                      event_name=Events.ITERATION_COMPLETED)
 
