@@ -114,7 +114,7 @@ num_ftrs = model.fc.in_features
 model.fc = torch.nn.Linear(num_ftrs, classes)
 
 
-model.load_state_dict(torch.load('models/Model_ResNet34_45.pth'))
+model.load_state_dict(torch.load('models/Model_ResNet34_3_48.pth'))
 # let's make our model work with 6 channels
 # trained_kernel = model.conv1.weight
 # new_conv = nn.Conv2d(6, 64, kernel_size=7, stride=2, padding=3, bias=False)
@@ -212,7 +212,7 @@ if not 'KAGGLE_WORKING_DIR' in os.environ:  # If we are not on kaggle server
     tb_logger.attach(trainer, log_handler=GradsHistHandler(model), event_name=Events.EPOCH_COMPLETED)
     tb_logger.close()
 
-trainer.run(loader, max_epochs=50)
+# trainer.run(loader, max_epochs=50)
 
 model.eval()
 with torch.no_grad():
