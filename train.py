@@ -150,7 +150,7 @@ def compute_and_display_val_metrics(engine):
 
 
 # lr_scheduler = ExponentialLR(optimizer, gamma=0.95)
-lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=10,
+lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5,
                                  verbose=True)
 
 
@@ -162,8 +162,8 @@ def update_lr_scheduler(engine):
     print("Learning rate: {}".format(lr))
 
 
-handler = EarlyStopping(patience=6, score_function=lambda engine: engine.state.metrics['accuracy'], trainer=trainer)
-val_evaluator.add_event_handler(Events.COMPLETED, handler)
+# handler = EarlyStopping(patience=6, score_function=lambda engine: engine.state.metrics['accuracy'], trainer=trainer)
+# val_evaluator.add_event_handler(Events.COMPLETED, handler)
 
 
 @trainer.on(Events.EPOCH_STARTED)
