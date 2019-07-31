@@ -188,7 +188,7 @@ def turn_on_layers(engine):
                 param.requires_grad = True
 
 
-checkpoints = ModelCheckpoint('models', 'Model', save_interval=3, n_saved=3, create_dir=True)
+checkpoints = ModelCheckpoint('models', 'Model', save_interval=3, n_saved=3, create_dir=True,require_empty=False)
 trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoints, {'ResNet34_2': model})
 
 pbar = ProgressBar(bar_format='')
