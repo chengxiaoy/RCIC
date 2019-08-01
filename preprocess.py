@@ -62,7 +62,7 @@ def convert_to_rgb_(cell):
     im = im.astype(np.uint8)
     im = Image.fromarray(im)
 
-    im = im.resize((224, 224), resample=Image.BILINEAR)
+    # im = im.resize((512, 512), resample=Image.BILINEAR)
 
     im.save(save_path)
 
