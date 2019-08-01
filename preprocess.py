@@ -12,6 +12,12 @@ from PIL import Image
 sys.path.append('rxrx1-utils')
 import rxrx.io as rio
 
+from multiprocessing import Pool
+
+from collections import namedtuple
+
+Cell = namedtuple('Cell', ['code', 'split', 'experiment', 'plate', 'well', 'site', 'extension'])
+
 for folder in ['train', 'test']:
     os.makedirs(folder)
 
@@ -23,27 +29,42 @@ print(test_df.shape)
 
 def convert_to_rgb(df, split, resize=True, new_size=224, extension='jpeg'):
     N = df.shape[0]
-
+    cc_list = []
     for i in tqdm(range(N)):
         code = df['id_code'][i]
         experiment = df['experiment'][i]
         plate = df['plate'][i]
         well = df['well'][i]
-
         for site in [1, 2]:
-            save_path = f'{split}/{code}_s{site}.{extension}'
+            cc = Cell(split, code, experiment, plate, well, site, extension)
+            cc_list.append(cc)
 
-            im = rio.load_site_as_rgb(
-                split, experiment, plate, well, site,
-                base_path='./data/'
-            )
-            im = im.astype(np.uint8)
-            im = Image.fromarray(im)
+    p = Pool(16)
+    p.map(convert_to_rgb_, cc_list)
+    p.close()
 
-            if resize:
-                im = im.resize((new_size, new_size), resample=Image.BILINEAR)
 
-            im.save(save_path)
+def convert_to_rgb_(cell):
+    split = cell.split
+    code = cell.code
+    site = cell.site
+    extension = cell.extension
+    experiment = cell.experiment
+    plate = cell.plate
+    well = cell.well
+
+    save_path = f'{split}/{code}_s{site}.{extension}'
+
+    im = rio.load_site_as_rgb(
+        split, experiment, plate, well, site,
+        base_path='./data/'
+    )
+    im = im.astype(np.uint8)
+    im = Image.fromarray(im)
+
+    im = im.resize((224, 224), resample=Image.BILINEAR)
+
+    im.save(save_path)
 
 
 convert_to_rgb(train_df, 'train')
