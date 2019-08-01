@@ -22,6 +22,7 @@ from sklearn.model_selection import train_test_split
 
 import warnings
 import sys
+from rcic_data import *
 
 sys.path.append('rxrx1-utils')
 import rxrx.io as rio
@@ -33,99 +34,43 @@ path_data = 'data'
 device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 batch_size = 32
 torch.manual_seed(0)
-
+use_rgb = True
 model_name = 'resnet_18'
-
-
-class ImagesDS(D.Dataset):
-    def __init__(self, df, img_dir, mode='train', augmentation=False, site=1, channels=[1, 2, 3, 4, 5, 6]):
-        self.records = df.to_records(index=False)
-        self.channels = channels
-        self.site = site
-        self.mode = mode
-        self.img_dir = img_dir
-        self.len = df.shape[0]
-        self.augmentation = augmentation
-
-    @staticmethod
-    def _load_img_as_tensor(file_name):
-        with Image.open(file_name) as img:
-            return T.ToTensor()(img)
-
-    def _get_img_path(self, index, channel):
-        experiment, well, plate = self.records[index].experiment, self.records[index].well, self.records[index].plate
-        return '/'.join([self.img_dir, self.mode, experiment, f'Plate{plate}', f'{well}_s{self.site}_w{channel}.png'])
-
-    def _transform(self, img, augumentation):
-        if augumentation:
-            trans = torchvision.transforms.Compose([
-                torchvision.transforms.RandomCrop(224),
-                torchvision.transforms.ToTensor(),
-                # torchvision.transforms.Normalize()
-                # torchvision.transforms.RandomGrayscale(p=0.2),
-                # torchvision.transforms.RandomRotation(90),
-                # torchvision.transforms.RandomHorizontalFlip(0.5),
-                # torchvision.transforms.RandomVerticalFlip(0.5),
-
-            ])
-            img = trans(img)
-        else:
-            trans = torchvision.transforms.Compose([
-                torchvision.transforms.CenterCrop(224),
-                torchvision.transforms.ToTensor(),
-                # torchvision.transforms.Normalize()
-                # torchvision.transforms.RandomGrayscale(p=0.2),
-                # torchvision.transforms.RandomRotation(90),
-                # torchvision.transforms.RandomHorizontalFlip(0.5),
-                # torchvision.transforms.RandomVerticalFlip(0.5),
-
-            ])
-            img = trans(img)
-        return img
-
-    def __getitem__(self, index):
-        # paths = [self._get_img_path(index, ch) for ch in self.channels]
-        # img = torch.cat([self._load_img_as_tensor(img_path) for img_path in paths])
-
-        experiment, well, plate = self.records[index].experiment, self.records[index].well, self.records[index].plate
-        img = rio.load_site_as_rgb(self.mode, experiment, plate, well, np.random.choice([1, 2]))
-        img = Image.fromarray(img.astype(np.uint8))
-
-        img = self._transform(img, self.augmentation)
-
-        if self.mode == 'train':
-            return img, int(self.records[index].sirna)
-        else:
-            return img, self.records[index].id_code
-
-    def __len__(self):
-        return self.len
-
-
-df = pd.read_csv(path_data + '/train.csv')
-df_train, df_val = train_test_split(df, test_size=0.035, stratify=df.sirna, random_state=42)
-df_test = pd.read_csv(path_data + '/test.csv')
-
-ds = ImagesDS(df_train, path_data, mode='train', augmentation=True)
-ds_val = ImagesDS(df_val, path_data, mode='train')
-ds_test = ImagesDS(df_test, path_data, mode='test')
-
 classes = 1108
 
-if model_name == 'resnet_18':
-    model = models.resnet18(pretrained=True)
-else:
-    model = None
-num_ftrs = model.fc.in_features
-model.fc = torch.nn.Linear(num_ftrs, classes)
+ds, ds_val, ds_test = get_dataset(use_rgb)
+
+
+def get_model(model_name, use_rgb):
+    if use_rgb:
+        if model_name == 'resnet_18':
+            model = models.resnet18(pretrained=True)
+        else:
+            model = None
+        num_ftrs = model.fc.in_features
+        model.fc = torch.nn.Linear(num_ftrs, classes)
+        return model
+    else:
+        if model_name == 'resnet_18':
+            model = models.resnet18(pretrained=True)
+        else:
+            model = None
+        num_ftrs = model.fc.in_features
+        model.fc = torch.nn.Linear(num_ftrs, classes)
+
+        # let's make our model work with 6 channels
+        trained_kernel = model.conv1.weight
+        new_conv = nn.Conv2d(6, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        with torch.no_grad():
+            new_conv.weight[:, :] = torch.stack([torch.mean(trained_kernel, 1)] * 6, dim=1)
+        model.conv1 = new_conv
+        return model
+
+
+model = get_model(model_name, use_rgb)
 
 # model.load_state_dict(torch.load('models/Model_ResNet34_3_48.pth'))
-# let's make our model work with 6 channels
-# trained_kernel = model.conv1.weight
-# new_conv = nn.Conv2d(6, 64, kernel_size=7, stride=2, padding=3, bias=False)
-# with torch.no_grad():
-#     new_conv.weight[:, :] = torch.stack([torch.mean(trained_kernel, 1)] * 6, dim=1)
-# model.conv1 = new_conv
+
 
 loader = D.DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=16)
 val_loader = D.DataLoader(ds_val, batch_size=batch_size, shuffle=True, num_workers=16)
