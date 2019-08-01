@@ -36,7 +36,7 @@ def convert_to_rgb(df, split, resize=True, new_size=224, extension='jpeg'):
         plate = df['plate'][i]
         well = df['well'][i]
         for site in [1, 2]:
-            cc = Cell(split, code, experiment, plate, well, site, extension)
+            cc = Cell(code, split, experiment, plate, well, site, extension)
             cc_list.append(cc)
 
     p = Pool(16)
