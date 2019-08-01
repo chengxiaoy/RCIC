@@ -35,7 +35,7 @@ device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 batch_size = 32
 torch.manual_seed(0)
 use_rgb = True
-model_name = 'resnet_18'
+model_name = 'rgb_resnet_18'
 classes = 1108
 
 ds, ds_val, ds_test = get_dataset(use_rgb)
@@ -43,7 +43,7 @@ ds, ds_val, ds_test = get_dataset(use_rgb)
 
 def get_model(model_name, use_rgb):
     if use_rgb:
-        if model_name == 'resnet_18':
+        if model_name == 'rgb_resnet_18':
             model = models.resnet18(pretrained=True)
         else:
             model = None
@@ -51,7 +51,7 @@ def get_model(model_name, use_rgb):
         model.fc = torch.nn.Linear(num_ftrs, classes)
         return model
     else:
-        if model_name == 'resnet_18':
+        if model_name == 'rgb_resnet_18':
             model = models.resnet18(pretrained=True)
         else:
             model = None
