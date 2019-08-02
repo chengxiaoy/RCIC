@@ -70,7 +70,7 @@ class ImagesDS(D.Dataset):
     def _transform(self, img, augumentation):
         if augumentation:
             trans = torchvision.transforms.Compose([
-                torchvision.transforms.RandomCrop(224),
+                # torchvision.transforms.RandomCrop(224),
                 torchvision.transforms.ToTensor(),
                 # torchvision.transforms.Normalize()
                 # torchvision.transforms.RandomGrayscale(p=0.2),
@@ -82,7 +82,7 @@ class ImagesDS(D.Dataset):
             img = trans(img)
         else:
             trans = torchvision.transforms.Compose([
-                torchvision.transforms.CenterCrop(224),
+                # torchvision.transforms.CenterCrop(224),
                 torchvision.transforms.ToTensor(),
                 # torchvision.transforms.Normalize()
                 # torchvision.transforms.RandomGrayscale(p=0.2),
