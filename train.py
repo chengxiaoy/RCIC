@@ -35,7 +35,7 @@ device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 batch_size = 32
 torch.manual_seed(0)
 use_rgb = False
-model_name = 'resnet_18'
+model_name = 'resnet_101'
 experiment_name = str(use_rgb) + "_" + model_name + "_" + datetime.now().strftime('%b%d_%H-%M')
 classes = 1108
 
@@ -74,7 +74,7 @@ def get_model(model_name, use_rgb):
 
 model = get_model(model_name, use_rgb)
 
-model.load_state_dict(torch.load('models/Model_resnet_18_Aug02_03-11_54.pth'))
+# model.load_state_dict(torch.load('models/Model_resnet_18_Aug02_03-11_54.pth'))
 
 
 loader = D.DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=16)
@@ -126,17 +126,17 @@ def update_lr_scheduler(engine):
 @trainer.on(Events.EPOCH_STARTED)
 def turn_on_layers(engine):
     epoch = engine.state.epoch
+    # if epoch == 1:
+    #     for name, child in model.named_children():
+    #         if name == 'fc':
+    #             pbar.log_message(name + ' is unfrozen')
+    #             for param in child.parameters():
+    #                 param.requires_grad = True
+    #         else:
+    #             pbar.log_message(name + ' is frozen')
+    #             for param in child.parameters():
+    #                 param.requires_grad = False
     if epoch == 1:
-        for name, child in model.named_children():
-            if name == 'fc':
-                pbar.log_message(name + ' is unfrozen')
-                for param in child.parameters():
-                    param.requires_grad = True
-            else:
-                pbar.log_message(name + ' is frozen')
-                for param in child.parameters():
-                    param.requires_grad = False
-    if epoch == 3:
         pbar.log_message("Turn on all the layers")
         for name, child in model.named_children():
             for param in child.parameters():
@@ -167,7 +167,7 @@ if not 'KAGGLE_WORKING_DIR' in os.environ:  # If we are not on kaggle server
     tb_logger.attach(trainer, log_handler=GradsHistHandler(model), event_name=Events.EPOCH_COMPLETED)
     tb_logger.close()
 
-# trainer.run(loader, max_epochs=100)
+trainer.run(loader, max_epochs=50)
 
 model.eval()
 with torch.no_grad():
