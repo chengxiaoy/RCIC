@@ -19,7 +19,7 @@ from ignite.handlers import EarlyStopping, ModelCheckpoint
 from tqdm import tqdm
 
 from sklearn.model_selection import train_test_split
-
+from datetime import datetime
 import warnings
 import sys
 from rcic_data import *
@@ -34,8 +34,9 @@ path_data = 'data'
 device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 batch_size = 32
 torch.manual_seed(0)
-use_rgb = True
-model_name = 'rgb_resnet_18'
+use_rgb = False
+model_name = 'resnet_18'
+experiment_name = model_name + "_" + datetime.now().strftime('%b%d_%H-%M')
 classes = 1108
 
 ds, ds_val, ds_test = get_dataset(use_rgb)
@@ -43,7 +44,7 @@ ds, ds_val, ds_test = get_dataset(use_rgb)
 
 def get_model(model_name, use_rgb):
     if use_rgb:
-        if model_name == 'rgb_resnet_18':
+        if model_name == 'resnet_18':
             model = models.resnet18(pretrained=True)
         else:
             model = None
@@ -51,7 +52,7 @@ def get_model(model_name, use_rgb):
         model.fc = torch.nn.Linear(num_ftrs, classes)
         return model
     else:
-        if model_name == 'rgb_resnet_18':
+        if model_name == 'resnet_18':
             model = models.resnet18(pretrained=True)
         else:
             model = None
@@ -121,17 +122,17 @@ def update_lr_scheduler(engine):
 @trainer.on(Events.EPOCH_STARTED)
 def turn_on_layers(engine):
     epoch = engine.state.epoch
-    # if epoch == 1:
-    #     for name, child in model.named_children():
-    #         if name == 'fc':
-    #             pbar.log_message(name + ' is unfrozen')
-    #             for param in child.parameters():
-    #                 param.requires_grad = True
-    #         else:
-    #             pbar.log_message(name + ' is frozen')
-    #             for param in child.parameters():
-    #                 param.requires_grad = False
     if epoch == 1:
+        for name, child in model.named_children():
+            if name == 'fc':
+                pbar.log_message(name + ' is unfrozen')
+                for param in child.parameters():
+                    param.requires_grad = True
+            else:
+                pbar.log_message(name + ' is frozen')
+                for param in child.parameters():
+                    param.requires_grad = False
+    if epoch == 3:
         pbar.log_message("Turn on all the layers")
         for name, child in model.named_children():
             for param in child.parameters():
@@ -139,7 +140,7 @@ def turn_on_layers(engine):
 
 
 checkpoints = ModelCheckpoint('models', 'Model', save_interval=3, n_saved=3, create_dir=True, require_empty=False)
-trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoints, {model_name: model})
+trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoints, {experiment_name: model})
 
 pbar = ProgressBar(bar_format='')
 # pbar.attach(trainer, output_transform=lambda x: {'loss': x})
@@ -149,7 +150,7 @@ import os
 if not 'KAGGLE_WORKING_DIR' in os.environ:  # If we are not on kaggle server
     from ignite.contrib.handlers.tensorboard_logger import *
 
-    tb_logger = TensorboardLogger("board/" + model_name)
+    tb_logger = TensorboardLogger("board/" + experiment_name)
     tb_logger.attach(trainer, log_handler=OutputHandler(tag="training", output_transform=lambda loss: {'loss': loss}),
                      event_name=Events.ITERATION_COMPLETED)
 
