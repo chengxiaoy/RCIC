@@ -36,7 +36,7 @@ batch_size = 32
 torch.manual_seed(0)
 use_rgb = False
 model_name = 'resnet_18'
-experiment_name = model_name + "_" + datetime.now().strftime('%b%d_%H-%M')
+experiment_name = str(use_rgb) + model_name + "_" + datetime.now().strftime('%b%d_%H-%M')
 classes = 1108
 
 ds, ds_val, ds_test = get_dataset(use_rgb)
