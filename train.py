@@ -31,10 +31,10 @@ warnings.filterwarnings('ignore')
 
 path_data = 'data'
 # device = 'cuda'
-device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 batch_size = 32
 torch.manual_seed(0)
-use_rgb = False
+use_rgb = True
 model_name = 'resnet_18'
 experiment_name = str(use_rgb) + model_name + "_" + datetime.now().strftime('%b%d_%H-%M')
 classes = 1108
