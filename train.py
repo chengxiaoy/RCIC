@@ -34,8 +34,8 @@ path_data = 'data'
 device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 batch_size = 32
 torch.manual_seed(0)
-use_rgb = True
-model_name = 'resnet_101'
+use_rgb = False
+model_name = 'resnet_18'
 experiment_name = str(use_rgb) + "_" + model_name + "_" + datetime.now().strftime('%b%d_%H-%M')
 classes = 1108
 
@@ -74,7 +74,7 @@ def get_model(model_name, use_rgb):
 
 model = get_model(model_name, use_rgb)
 
-# model.load_state_dict(torch.load('models/Model_ResNet34_3_48.pth'))
+model.load_state_dict(torch.load('models/Model_resnet_18_Aug02_03-11_54.pth'))
 
 
 loader = D.DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=16)
@@ -167,7 +167,7 @@ if not 'KAGGLE_WORKING_DIR' in os.environ:  # If we are not on kaggle server
     tb_logger.attach(trainer, log_handler=GradsHistHandler(model), event_name=Events.EPOCH_COMPLETED)
     tb_logger.close()
 
-trainer.run(loader, max_epochs=100)
+# trainer.run(loader, max_epochs=100)
 
 model.eval()
 with torch.no_grad():
