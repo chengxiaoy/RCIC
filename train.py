@@ -34,7 +34,7 @@ path_data = 'data'
 device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 batch_size = 32
 torch.manual_seed(0)
-use_rgb = True
+use_rgb = False
 model_name = 'resnet_101'
 experiment_name = str(use_rgb) + "_" + model_name + "_" + datetime.now().strftime('%b%d_%H-%M')
 classes = 1108
