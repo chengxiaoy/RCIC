@@ -77,7 +77,7 @@ val_loader = D.DataLoader(ds_val, batch_size=batch_size, shuffle=True, num_worke
 tloader = D.DataLoader(ds_test, batch_size=batch_size, shuffle=False, num_workers=16)
 
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.0003)
 
 metrics = {
     'loss': Loss(criterion),
