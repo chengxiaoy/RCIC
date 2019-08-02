@@ -32,7 +32,7 @@ warnings.filterwarnings('ignore')
 path_data = 'data'
 # device = 'cuda'
 device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
-batch_size = 16
+batch_size = 32
 torch.manual_seed(0)
 use_rgb = False
 model_name = 'densenet201'
@@ -78,6 +78,7 @@ def get_model(model_name, use_rgb):
 
 
 model = get_model(model_name, use_rgb)
+model = model.half()
 
 # model.load_state_dict(torch.load('models/Model_resnet_18_Aug02_03-11_54.pth'))
 
