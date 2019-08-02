@@ -49,7 +49,7 @@ def get_model(model_name, use_rgb):
         elif model_name == 'resnet_101':
             model = models.resnet101(pretrained=True)
         elif model_name == 'densenet201':
-            model = models.densenet121(pretrained=True)
+            model = models.densenet201(pretrained=True)
         else:
             model = None
         num_ftrs = model.fc.in_features
@@ -61,7 +61,7 @@ def get_model(model_name, use_rgb):
         elif model_name == 'resnet_101':
             model = models.resnet101(pretrained=True)
         elif model_name == 'densenet201':
-            model = models.densenet121(pretrained=True)
+            model = models.densenet201(pretrained=True)
         else:
             model = None
         num_ftrs = model.fc.in_features
