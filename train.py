@@ -35,7 +35,7 @@ device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 batch_size = 32
 torch.manual_seed(0)
 use_rgb = True
-model_name = 'resnet_18'
+model_name = 'resnet_101'
 experiment_name = str(use_rgb) + "_" + model_name + "_" + datetime.now().strftime('%b%d_%H-%M')
 classes = 1108
 
@@ -46,6 +46,8 @@ def get_model(model_name, use_rgb):
     if use_rgb:
         if model_name == 'resnet_18':
             model = models.resnet18(pretrained=True)
+        elif model_name == 'resnet_101':
+            model = models.resnet101(pretrained=True)
         else:
             model = None
         num_ftrs = model.fc.in_features
@@ -54,6 +56,8 @@ def get_model(model_name, use_rgb):
     else:
         if model_name == 'resnet_18':
             model = models.resnet18(pretrained=True)
+        elif model_name == 'resnet_101':
+            model = models.resnet101(pretrained=True)
         else:
             model = None
         num_ftrs = model.fc.in_features
