@@ -69,11 +69,11 @@ def get_model(model_name, use_rgb):
             model.conv1 = new_conv
             return model
         elif model_name.startswith('dense'):
-            trained_kernel = model.features.conv1.weight
+            trained_kernel = model.features.conv0.weight
             new_conv = nn.Conv2d(6, 64, kernel_size=7, stride=2, padding=3, bias=False)
             with torch.no_grad():
                 new_conv.weight[:, :] = torch.stack([torch.mean(trained_kernel, 1)] * 6, dim=1)
-            model.features.conv1 = new_conv
+            model.features.conv0 = new_conv
             return model
 
 
