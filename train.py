@@ -23,6 +23,7 @@ from datetime import datetime
 import warnings
 import sys
 from rcic_data import *
+from model import get_model
 
 sys.path.append('rxrx1-utils')
 import rxrx.io as rio
@@ -35,47 +36,11 @@ device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 batch_size = 32
 torch.manual_seed(0)
 use_rgb = False
-model_name = 'densenet201'
+model_name = 'resnet_101'
 experiment_name = str(use_rgb) + "_" + model_name + "_" + datetime.now().strftime('%b%d_%H-%M')
 classes = 1108
 
 ds, ds_val, ds_test = get_dataset(use_rgb)
-
-
-def get_model(model_name, use_rgb):
-    if model_name == 'resnet_18':
-        model = models.resnet18(pretrained=True)
-    elif model_name == 'resnet_101':
-        model = models.resnet101(pretrained=True)
-    elif model_name == 'densenet201':
-        model = models.densenet201(pretrained=True)
-    else:
-        model = None
-    if model_name.startswith('resnet'):
-        num_ftrs = model.fc.in_features
-        model.fc = torch.nn.Linear(num_ftrs, classes)
-    elif model_name.startswith('dense'):
-        num_ftrs = model.classifier.in_features
-        model.classifier = torch.nn.Linear(num_ftrs, classes)
-
-    if use_rgb:
-        return model
-    else:
-        if model_name.startswith('resnet'):
-            trained_kernel = model.conv1.weight
-            new_conv = nn.Conv2d(6, 64, kernel_size=7, stride=2, padding=3, bias=False)
-            with torch.no_grad():
-                new_conv.weight[:, :] = torch.stack([torch.mean(trained_kernel, 1)] * 6, dim=1)
-            model.conv1 = new_conv
-            return model
-        elif model_name.startswith('dense'):
-            trained_kernel = model.features.conv0.weight
-            new_conv = nn.Conv2d(6, 64, kernel_size=7, stride=2, padding=3, bias=False)
-            with torch.no_grad():
-                new_conv.weight[:, :] = torch.stack([torch.mean(trained_kernel, 1)] * 6, dim=1)
-            model.features.conv0 = new_conv
-            return model
-
 
 model = get_model(model_name, use_rgb)
 
