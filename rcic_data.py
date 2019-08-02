@@ -60,7 +60,7 @@ class ImagesDS(D.Dataset):
     @staticmethod
     def _load_img_as_tensor(file_name):
         with Image.open(file_name) as img:
-            img = T.Resize(384)(img)
+            img = T.Resize(224)(img)
             return T.ToTensor()(img)
 
     def _get_img_path(self, index, channel):
