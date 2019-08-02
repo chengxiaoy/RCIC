@@ -60,6 +60,7 @@ class ImagesDS(D.Dataset):
     @staticmethod
     def _load_img_as_tensor(file_name):
         with Image.open(file_name) as img:
+            img = T.Resize(384)(img)
             return T.ToTensor()(img)
 
     def _get_img_path(self, index, channel):
@@ -98,7 +99,7 @@ class ImagesDS(D.Dataset):
         if not self.rgb:
             paths = [self._get_img_path(index, ch) for ch in self.channels]
             img = torch.cat([self._load_img_as_tensor(img_path) for img_path in paths])
-            img = img.half()
+
             if self.mode == 'train':
                 return img, int(self.records[index].sirna)
             else:

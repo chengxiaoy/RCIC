@@ -78,7 +78,7 @@ def get_model(model_name, use_rgb):
 
 
 model = get_model(model_name, use_rgb)
-model = model.half()
+
 
 # model.load_state_dict(torch.load('models/Model_resnet_18_Aug02_03-11_54.pth'))
 
