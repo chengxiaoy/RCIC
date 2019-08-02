@@ -25,7 +25,7 @@ img_dir = './data'
 def get_dataset(rgb=True):
     if rgb:
         rgb_df = pd.read_csv(rgb_train_csv_path)
-        df_train, df_val = train_test_split(rgb_df, test_size=0.035, stratify=rgb_df.sirna, random_state=42)
+        df_train, df_val = train_test_split(rgb_df, test_size=0.05, stratify=rgb_df.sirna, random_state=42)
         df_test = pd.read_csv(rgb_test_csv_path)
 
         ds = ImagesDS(df_train, 'train', True, mode='train', augmentation=True)
@@ -35,7 +35,7 @@ def get_dataset(rgb=True):
         return ds, ds_val, ds_test
     else:
         rgb_df = pd.read_csv(train_csv_path)
-        df_train, df_val = train_test_split(rgb_df, test_size=0.035, stratify=rgb_df.sirna, random_state=42)
+        df_train, df_val = train_test_split(rgb_df, test_size=0.05, stratify=rgb_df.sirna, random_state=42)
         df_test = pd.read_csv(test_csv_path)
         ds = ImagesDS(df_train, img_dir, False, mode='train', augmentation=True)
         ds_val = ImagesDS(df_val, img_dir, False, mode='train')
