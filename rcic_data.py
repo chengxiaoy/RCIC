@@ -63,8 +63,7 @@ class ImagesDS(D.Dataset):
             # img = T.Resize(224)(img)
             return T.ToTensor()(img)
 
-    def _get_img_path(self, index, channel):
-        site = random.choice([1, 2])
+    def _get_img_path(self, index, channel, site):
         experiment, well, plate = self.records[index].experiment, self.records[index].well, self.records[index].plate
         return '/'.join([self.img_dir, self.mode, experiment, f'Plate{plate}', f'{well}_s{site}_w{channel}.png'])
 
@@ -97,8 +96,14 @@ class ImagesDS(D.Dataset):
 
     def __getitem__(self, index):
         if not self.rgb:
-            paths = [self._get_img_path(index, ch) for ch in self.channels]
-            img = torch.cat([self._load_img_as_tensor(img_path) for img_path in paths])
+            site = random.choice([1, 2])
+            tensor_path = "tensor/" + str(index) + "_" + str(site) + '.pt'
+            if not os.path.exists(tensor_path):
+                paths = [self._get_img_path(index, ch, site) for ch in self.channels]
+                img = torch.cat([self._load_img_as_tensor(img_path) for img_path in paths])
+                torch.save(img, tensor_path)
+            else:
+                torch.load(tensor_path)
 
             if self.mode == 'train':
                 return img, int(self.records[index].sirna)
