@@ -103,7 +103,7 @@ class ImagesDS(D.Dataset):
                 img = torch.cat([self._load_img_as_tensor(img_path) for img_path in paths])
                 torch.save(img, tensor_path)
             else:
-                torch.load(tensor_path)
+                img = torch.load(tensor_path)
 
             if self.mode == 'train':
                 return img, int(self.records[index].sirna)
