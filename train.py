@@ -32,11 +32,11 @@ warnings.filterwarnings('ignore')
 
 path_data = 'data'
 # device = 'cuda'
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-batch_size = 32
+device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+batch_size = 16
 torch.manual_seed(0)
 use_rgb = False
-model_name = 'densenet201'
+model_name = 'resnet_101'
 experiment_name = str(use_rgb) + "_" + model_name + "_" + datetime.now().strftime('%b%d_%H-%M')
 classes = 1108
 
@@ -44,7 +44,7 @@ ds, ds_val, ds_test = get_dataset(use_rgb)
 
 model = get_model(model_name, use_rgb)
 
-model = torch.nn.DataParallel(model, device_ids=[0, 1, 3])
+# model = torch.nn.DataParallel(model, device_ids=[0, 1, 3])
 
 # model.load_state_dict(torch.load('models/Model_resnet_18_Aug02_03-11_54.pth'))
 
