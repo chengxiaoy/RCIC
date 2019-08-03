@@ -22,29 +22,30 @@ test_csv_path = './data/test.csv'
 img_dir = './data'
 
 
-def get_dataset(rgb=True):
+def get_dataset(rgb=True, size=512):
     if rgb:
         rgb_df = pd.read_csv(rgb_train_csv_path)
         df_train, df_val = train_test_split(rgb_df, test_size=0.05, stratify=rgb_df.sirna, random_state=42)
         df_test = pd.read_csv(rgb_test_csv_path)
 
-        ds = ImagesDS(df_train, 'train', True, mode='train', augmentation=True)
-        ds_val = ImagesDS(df_val, 'train', True, mode='train')
-        ds_test = ImagesDS(df_test, 'test', True, mode='test')
+        ds = ImagesDS(df_train, 'train', True, mode='train', augmentation=True, size=size)
+        ds_val = ImagesDS(df_val, 'train', True, mode='train', size=size)
+        ds_test = ImagesDS(df_test, 'test', True, mode='test', size=size)
 
         return ds, ds_val, ds_test
     else:
         rgb_df = pd.read_csv(train_csv_path)
         df_train, df_val = train_test_split(rgb_df, test_size=0.05, stratify=rgb_df.sirna, random_state=42)
         df_test = pd.read_csv(test_csv_path)
-        ds = ImagesDS(df_train, img_dir, False, mode='train', augmentation=True)
-        ds_val = ImagesDS(df_val, img_dir, False, mode='train')
-        ds_test = ImagesDS(df_test, img_dir, False, mode='test')
+        ds = ImagesDS(df_train, img_dir, False, mode='train', augmentation=True, size=size)
+        ds_val = ImagesDS(df_val, img_dir, False, mode='train', size=size)
+        ds_test = ImagesDS(df_test, img_dir, False, mode='test', size=size)
         return ds, ds_val, ds_test
 
 
 class ImagesDS(D.Dataset):
-    def __init__(self, df, img_dir, rgb, mode='train', augmentation=False, site=1, channels=[1, 2, 3, 4, 5, 6]):
+    def __init__(self, df, img_dir, rgb, mode='train', augmentation=False, size=512, site=1,
+                 channels=[1, 2, 3, 4, 5, 6]):
         self.records = df.to_records(index=False)
         self.channels = channels
         self.site = site
@@ -56,11 +57,12 @@ class ImagesDS(D.Dataset):
             self.len = self.records.size
         self.augmentation = augmentation
         self.rgb = rgb
+        self.size = size
 
     @staticmethod
-    def _load_img_as_tensor(file_name):
+    def _load_img_as_tensor(file_name, size):
         with Image.open(file_name) as img:
-            # img = T.Resize(224)(img)
+            img = T.Resize(size)(img)
             return T.ToTensor()(img)
 
     def _get_img_path(self, index, channel, site):
@@ -97,10 +99,10 @@ class ImagesDS(D.Dataset):
     def __getitem__(self, index):
         if not self.rgb:
             site = random.choice([1, 2])
-            tensor_path = "tensor/" + str(self.records[index].id_code) + "_" + str(site) + '.pt'
+            tensor_path = "tensor/" + str(self.records[index].id_code) + "_" + str(site) + '_' + str(self.size) + '.pt'
             if not os.path.exists(tensor_path):
                 paths = [self._get_img_path(index, ch, site) for ch in self.channels]
-                img = torch.cat([self._load_img_as_tensor(img_path) for img_path in paths])
+                img = torch.cat([self._load_img_as_tensor(img_path, self.size) for img_path in paths])
                 torch.save(img, tensor_path)
             else:
                 img = torch.load(tensor_path)

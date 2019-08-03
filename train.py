@@ -39,8 +39,9 @@ use_rgb = False
 model_name = 'densenet201'
 experiment_name = str(use_rgb) + "_" + model_name + "_" + datetime.now().strftime('%b%d_%H-%M')
 classes = 1108
+pic_size = 384
 
-ds, ds_val, ds_test = get_dataset(use_rgb)
+ds, ds_val, ds_test = get_dataset(use_rgb, size=pic_size)
 
 model = get_model(model_name, use_rgb)
 
