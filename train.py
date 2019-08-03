@@ -139,7 +139,7 @@ if not 'KAGGLE_WORKING_DIR' in os.environ:  # If we are not on kaggle server
     tb_logger.attach(trainer, log_handler=GradsHistHandler(model), event_name=Events.EPOCH_COMPLETED)
     tb_logger.close()
 
-trainer.run(loader, max_epochs=50)
+trainer.run(loader, max_epochs=100)
 
 model.eval()
 with torch.no_grad():

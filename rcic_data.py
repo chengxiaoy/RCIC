@@ -97,7 +97,7 @@ class ImagesDS(D.Dataset):
     def __getitem__(self, index):
         if not self.rgb:
             site = random.choice([1, 2])
-            tensor_path = "tensor/" + str(index) + "_" + str(site) + '.pt'
+            tensor_path = "tensor/" + str(self.records[index].id_code) + "_" + str(site) + '.pt'
             if not os.path.exists(tensor_path):
                 paths = [self._get_img_path(index, ch, site) for ch in self.channels]
                 img = torch.cat([self._load_img_as_tensor(img_path) for img_path in paths])
