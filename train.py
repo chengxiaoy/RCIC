@@ -81,7 +81,7 @@ def compute_and_display_val_metrics(engine):
 
 
 # lr_scheduler = ExponentialLR(optimizer, gamma=0.95)
-lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.3, patience=5,
+lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5,
                                  verbose=True)
 
 
