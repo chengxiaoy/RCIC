@@ -38,7 +38,7 @@ torch.manual_seed(0)
 use_rgb = False
 model_name = 'densenet201'
 classes = 1108
-pic_size = 512
+pic_size = 384
 experiment_name = str(use_rgb) + "_" + str(batch_size) + "_" + str(
     pic_size) + "_" + model_name + "_" + datetime.now().strftime('%b%d_%H-%M')
 
