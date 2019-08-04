@@ -6,7 +6,7 @@ from PIL import Image
 import torch
 import torch.nn as nn
 import torch.utils.data as D
-from torch.optim.lr_scheduler import ExponentialLR, ReduceLROnPlateau
+from torch.optim.lr_scheduler import ExponentialLR, ReduceLROnPlateau, MultiStepLR
 
 from torchvision import models, transforms as T
 import torchvision
@@ -46,7 +46,7 @@ ds, ds_val, ds_test = get_dataset(use_rgb, size=pic_size)
 
 model = get_model(model_name, use_rgb)
 
-model = torch.nn.DataParallel(model, device_ids=[0, 1, 2,3])
+model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
 
 # model.load_state_dict(torch.load('models/Model_resnet_18_Aug02_03-11_54.pth'))
 
@@ -81,8 +81,8 @@ def compute_and_display_val_metrics(engine):
 
 
 # lr_scheduler = ExponentialLR(optimizer, gamma=0.95)
-lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5,
-                                 verbose=True)
+# lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
+lr_scheduler = MultiStepLR(optimizer, [30, 60, 100], 0.1)
 
 
 @trainer.on(Events.EPOCH_COMPLETED)
@@ -117,7 +117,9 @@ def turn_on_layers(engine):
                 param.requires_grad = True
 
 
-checkpoints = ModelCheckpoint('models', 'Model', save_interval=3, n_saved=3, create_dir=True, require_empty=False)
+# checkpoints = ModelCheckpoint('models', 'Model', save_interval=3, n_saved=3, create_dir=True, require_empty=False)
+checkpoints = ModelCheckpoint('models', 'Model', score_function=lambda engine: engine.state.metrics['accuracy'],
+                              score_name='val_acc', n_saved=3, create_dir=True, require_empty=False)
 trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoints, {experiment_name: model})
 
 pbar = ProgressBar(bar_format='')
