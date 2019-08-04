@@ -37,9 +37,10 @@ batch_size = 16
 torch.manual_seed(0)
 use_rgb = False
 model_name = 'densenet201'
-experiment_name = str(use_rgb) + "_" + model_name + "_" + datetime.now().strftime('%b%d_%H-%M')
 classes = 1108
-pic_size = 384
+pic_size = 512
+experiment_name = str(use_rgb) + "_" + str(batch_size) + "_" + str(
+    pic_size) + "_" + model_name + "_" + datetime.now().strftime('%b%d_%H-%M')
 
 ds, ds_val, ds_test = get_dataset(use_rgb, size=pic_size)
 
