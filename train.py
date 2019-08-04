@@ -120,7 +120,7 @@ def turn_on_layers(engine):
 # checkpoints = ModelCheckpoint('models', 'Model', save_interval=3, n_saved=3, create_dir=True, require_empty=False)
 checkpoints = ModelCheckpoint('models', 'Model', score_function=lambda engine: engine.state.metrics['accuracy'],
                               score_name='val_acc', n_saved=3, create_dir=True, require_empty=False)
-trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoints, {experiment_name: model})
+val_evaluator.add_event_handler(Events.EPOCH_COMPLETED, checkpoints, {experiment_name: model})
 
 pbar = ProgressBar(bar_format='')
 # pbar.attach(trainer, output_transform=lambda x: {'loss': x})
