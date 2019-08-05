@@ -102,17 +102,17 @@ def update_lr_scheduler(engine):
 @trainer.on(Events.EPOCH_STARTED)
 def turn_on_layers(engine):
     epoch = engine.state.epoch
+    # if epoch == 1:
+    #     for name, child in model.named_children():
+    #         if name == 'fc':
+    #             pbar.log_message(name + ' is unfrozen')
+    #             for param in child.parameters():
+    #                 param.requires_grad = True
+    #         else:
+    #             pbar.log_message(name + ' is frozen')
+    #             for param in child.parameters():
+    #                 param.requires_grad = False
     if epoch == 1:
-        for name, child in model.named_children():
-            if name == 'fc':
-                pbar.log_message(name + ' is unfrozen')
-                for param in child.parameters():
-                    param.requires_grad = True
-            else:
-                pbar.log_message(name + ' is frozen')
-                for param in child.parameters():
-                    param.requires_grad = False
-    if epoch == 2:
         pbar.log_message("Turn on all the layers")
         for name, child in model.named_children():
             for param in child.parameters():
