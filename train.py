@@ -32,8 +32,8 @@ warnings.filterwarnings('ignore')
 
 path_data = 'data'
 # device = 'cuda'
-device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
-batch_size = 64
+device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+batch_size = 32
 torch.manual_seed(0)
 use_rgb = False
 model_name = 'resnet_18'
@@ -81,15 +81,16 @@ def compute_and_display_val_metrics(engine):
 
 
 # lr_scheduler = ExponentialLR(optimizer, gamma=0.95)
-lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
+# lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
 
 
-# lr_scheduler = MultiStepLR(optimizer, [30, 60, 100], 0.1)
+lr_scheduler = MultiStepLR(optimizer, [18, 30, 50], 0.1)
 
 
 @trainer.on(Events.EPOCH_COMPLETED)
 def update_lr_scheduler(engine):
-    lr_scheduler.step(val_epoch[engine.state.epoch]['accuracy'])
+    lr_scheduler.step()
+    # lr_scheduler.step(val_epoch[engine.state.epoch]['accuracy'])
     # lr_scheduler.step(engine.state.metrics['accuracy'])
     lr = float(optimizer.param_groups[0]['lr'])
     print("Learning rate: {}".format(lr))
