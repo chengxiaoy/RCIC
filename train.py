@@ -32,8 +32,8 @@ warnings.filterwarnings('ignore')
 
 path_data = 'data'
 # device = 'cuda'
-device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
-batch_size = 32
+device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
+batch_size = 16
 torch.manual_seed(0)
 use_rgb = False
 model_name = 'resnet_18'
