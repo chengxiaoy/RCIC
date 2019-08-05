@@ -124,4 +124,4 @@ class ImagesDS(D.Dataset):
                 return img, self.records[index].id_code
 
     def __len__(self):
-        return self.len//2
+        return self.len
