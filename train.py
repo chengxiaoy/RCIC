@@ -80,11 +80,11 @@ def compute_and_display_val_metrics(engine):
                   metrics['accuracy']))
 
 
-lr_scheduler = ExponentialLR(optimizer, gamma=0.95)
+# lr_scheduler = ExponentialLR(optimizer, gamma=0.95)
 # lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
 
 
-# lr_scheduler = MultiStepLR(optimizer, [18, 30, 50], 0.1)
+lr_scheduler = MultiStepLR(optimizer, [15, 50, 100], 0.1)
 
 
 @trainer.on(Events.EPOCH_COMPLETED)
