@@ -135,7 +135,7 @@ if not 'KAGGLE_WORKING_DIR' in os.environ:  # If we are not on kaggle server
 
     tb_logger = TensorboardLogger("board/" + experiment_name)
     tb_logger.attach(trainer, log_handler=OutputHandler(tag="training", output_transform=lambda loss: {'loss': loss}),
-                     event_name=Events.ITERATION_COMPLETED)
+                     event_name=Events.EPOCH_COMPLETED)
 
     tb_logger.attach(val_evaluator, log_handler=OutputHandler(tag="validation", metric_names=["accuracy", "loss"],
                                                               another_engine=trainer),
