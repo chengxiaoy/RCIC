@@ -36,7 +36,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 batch_size = 12
 torch.manual_seed(0)
 use_rgb = False
-model_name = 'resnet_18'
+model_name = 'densenet201'
 classes = 1108
 pic_size = 512
 experiment_name = str(use_rgb) + "_" + str(batch_size) + "_" + str(
