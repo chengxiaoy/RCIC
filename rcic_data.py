@@ -99,13 +99,15 @@ class ImagesDS(D.Dataset):
     def __getitem__(self, index):
         if not self.rgb:
             site = random.choice([1, 2])
-            tensor_path = "tensor/" + str(self.records[index].id_code) + "_" + str(site) + '_' + str(self.size) + '.pt'
-            if not os.path.exists(tensor_path):
-                paths = [self._get_img_path(index, ch, site) for ch in self.channels]
-                img = torch.cat([self._load_img_as_tensor(img_path, self.size) for img_path in paths])
-                torch.save(img, tensor_path)
-            else:
-                img = torch.load(tensor_path)
+            # tensor_path = "tensor/" + str(self.records[index].id_code) + "_" + str(site) + '_' + str(self.size) + '.pt'
+            # if not os.path.exists(tensor_path):
+            #     paths = [self._get_img_path(index, ch, site) for ch in self.channels]
+            #     img = torch.cat([self._load_img_as_tensor(img_path, self.size) for img_path in paths])
+            #     torch.save(img, tensor_path)
+            # else:
+            #     img = torch.load(tensor_path)
+            paths = [self._get_img_path(index, ch, site) for ch in self.channels]
+            img = torch.cat([self._load_img_as_tensor(img_path, self.size) for img_path in paths])
 
             if self.mode == 'train':
                 return img, int(self.records[index].sirna)
