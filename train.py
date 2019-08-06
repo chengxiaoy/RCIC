@@ -33,7 +33,7 @@ warnings.filterwarnings('ignore')
 path_data = 'data'
 # device = 'cuda'
 device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
-batch_size = 16
+batch_size = 12
 torch.manual_seed(0)
 use_rgb = False
 model_name = 'densenet201'
