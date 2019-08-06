@@ -25,8 +25,8 @@ import sys
 from rcic_data import *
 from model import get_model
 
-sys.path.append('rxrx1-utils')
-import rxrx.io as rio
+# sys.path.append('rxrx1-utils')
+# import rxrx.io as rio
 
 warnings.filterwarnings('ignore')
 
