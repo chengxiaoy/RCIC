@@ -33,7 +33,7 @@ warnings.filterwarnings('ignore')
 path_data = 'data'
 # device = 'cuda'
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-batch_size = 48
+batch_size = 24
 torch.manual_seed(0)
 use_rgb = False
 model_name = 'densenet201'
@@ -46,10 +46,10 @@ ds, ds_val, ds_test = get_dataset(use_rgb, size=pic_size)
 
 model = get_model(model_name, use_rgb)
 
-model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
+model = torch.nn.DataParallel(model, device_ids=[2, 3])
 
-model.load_state_dict(torch.load('models/Model_False_48_512_densenet201_Aug06_16-06_37_val_acc=0.483023.pth'))
-model = model.module
+# model.load_state_dict(torch.load('models/Model_False_48_512_densenet201_Aug06_16-06_37_val_acc=0.483023.pth'))
+# model = model.module
 
 loader = D.DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=16)
 val_loader = D.DataLoader(ds_val, batch_size=batch_size, shuffle=True, num_workers=16)
@@ -148,7 +148,7 @@ if not 'KAGGLE_WORKING_DIR' in os.environ:  # If we are not on kaggle server
     tb_logger.attach(trainer, log_handler=GradsHistHandler(model), event_name=Events.EPOCH_COMPLETED)
     tb_logger.close()
 
-# trainer.run(loader, max_epochs=100)
+trainer.run(loader, max_epochs=100)
 
 model.eval()
 with torch.no_grad():

@@ -25,7 +25,7 @@ img_dir = './data'
 def get_dataset(rgb=True, size=512):
     if rgb:
         rgb_df = pd.read_csv(rgb_train_csv_path)
-        df_train, df_val = train_test_split(rgb_df, test_size=0.05, stratify=rgb_df.sirna, random_state=42)
+        df_train, df_val = train_test_split(rgb_df, test_size=0.1, stratify=rgb_df.sirna, random_state=42)
         df_test = pd.read_csv(rgb_test_csv_path)
 
         ds = ImagesDS(df_train, 'train', True, mode='train', augmentation=True, size=size)
