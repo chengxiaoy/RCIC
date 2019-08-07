@@ -48,7 +48,7 @@ model = get_model(model_name, use_rgb)
 
 model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
 
-# model.load_state_dict(torch.load('models/Model_resnet_18_Aug02_03-11_54.pth'))
+model.load_state_dict(torch.load('models/Model_resnet_18_Aug02_03-11_54.pth'))
 
 
 loader = D.DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=16)
@@ -146,7 +146,7 @@ if not 'KAGGLE_WORKING_DIR' in os.environ:  # If we are not on kaggle server
     tb_logger.attach(trainer, log_handler=GradsHistHandler(model), event_name=Events.EPOCH_COMPLETED)
     tb_logger.close()
 
-trainer.run(loader, max_epochs=100)
+# trainer.run(loader, max_epochs=100)
 
 model.eval()
 with torch.no_grad():
