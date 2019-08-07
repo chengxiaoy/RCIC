@@ -48,7 +48,7 @@ model = get_model(model_name, use_rgb)
 
 model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
 
-model.load_state_dict(torch.load('models/Model_resnet_18_Aug02_03-11_54.pth'))
+model.load_state_dict(torch.load('models/Model_False_48_512_densenet201_Aug06_16-06_31_val_acc=0.5.pth'))
 
 
 loader = D.DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=16)
