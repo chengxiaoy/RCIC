@@ -118,7 +118,7 @@ class ImagesDS(D.Dataset):
         else:
             if random.choice([0, 1]):
                 index = self.len + index
-            filename = self.records[index].filename
+            filename = self.records[index % self.len].filename
             img = Image.open(os.path.join(self.img_dir, filename))
             img = self._transform(img, self.augmentation)
 
