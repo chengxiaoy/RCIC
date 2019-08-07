@@ -98,7 +98,8 @@ class ImagesDS(D.Dataset):
 
     def __getitem__(self, index):
         if not self.rgb:
-            site = random.choice([1, 2])
+            # site = random.choice([1, 2])
+            site = 1
             # tensor_path = "tensor/" + str(self.records[index].id_code) + "_" + str(site) + '_' + str(self.size) + '.pt'
             # if not os.path.exists(tensor_path):
             #     paths = [self._get_img_path(index, ch, site) for ch in self.channels]
