@@ -98,7 +98,8 @@ class ImagesDS(D.Dataset):
 
     def __getitem__(self, index):
         if not self.rgb:
-            site = random.choice([1, 2])
+            site = index // self.len + 1
+            # site = random.choice([1, 2])
             # site = 1
             # tensor_path = "tensor/" + str(self.records[index].id_code) + "_" + str(site) + '_' + str(self.size) + '.pt'
             # if not os.path.exists(tensor_path):
@@ -127,4 +128,4 @@ class ImagesDS(D.Dataset):
                 return img, self.records[index].id_code
 
     def __len__(self):
-        return self.len
+        return self.len * 2
