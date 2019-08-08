@@ -162,6 +162,7 @@ with torch.no_grad():
         idx = output.max(dim=-1)[1].cpu().numpy()
         confidence = output.max(dim=-1)[0].cpu().numpy()
         preds = np.append(preds, idx, axis=0)
+        confi = np.append(confi, confidence, axis=0)
 
 joblib.dump([confi, preds], "res.pkl")
 
