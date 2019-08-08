@@ -24,6 +24,7 @@ import warnings
 import sys
 from rcic_data import *
 from model import get_model
+import joblib
 
 # sys.path.append('rxrx1-utils')
 # import rxrx.io as rio
@@ -48,8 +49,8 @@ model = get_model(model_name, use_rgb)
 
 model = torch.nn.DataParallel(model, device_ids=[2, 3])
 
-# model.load_state_dict(torch.load('models/Model_False_48_512_densenet201_Aug06_16-06_37_val_acc=0.483023.pth'))
-# model = model.module
+model.load_state_dict(torch.load('models/Model_False_24_512_densenet201_Aug07_13-01_35_val_acc=0.526287.pth'))
+model = model.module
 
 loader = D.DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=16)
 val_loader = D.DataLoader(ds_val, batch_size=batch_size, shuffle=True, num_workers=16)
@@ -148,16 +149,22 @@ if not 'KAGGLE_WORKING_DIR' in os.environ:  # If we are not on kaggle server
     tb_logger.attach(trainer, log_handler=GradsHistHandler(model), event_name=Events.EPOCH_COMPLETED)
     tb_logger.close()
 
-trainer.run(loader, max_epochs=100)
+# trainer.run(loader, max_epochs=100)
 
 model.eval()
+
+preds = np.empty(0)
+confi = np.empty(0)
 with torch.no_grad():
-    preds = np.empty(0)
     for x, _ in tqdm(tloader):
         x = x.to(device)
         output = model(x)
         idx = output.max(dim=-1)[1].cpu().numpy()
+        confidence = output.max(dim=-1)[0].cpu().numpy()
         preds = np.append(preds, idx, axis=0)
-submission = pd.read_csv(path_data + '/test.csv')
-submission['sirna'] = preds.astype(int)
-submission.to_csv('submission.csv', index=False, columns=['id_code', 'sirna'])
+
+joblib.dump([confi, preds], "res.pkl")
+
+# submission = pd.read_csv(path_data + '/test.csv')
+# submission['sirna'] = preds.astype(int)
+# submission.to_csv('submission.csv', index=False, columns=['id_code', 'sirna'])
