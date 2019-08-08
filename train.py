@@ -34,10 +34,10 @@ warnings.filterwarnings('ignore')
 path_data = 'data'
 # device = 'cuda'
 device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
-batch_size = 24
+batch_size = 32
 torch.manual_seed(0)
 use_rgb = False
-model_name = 'densenet201'
+model_name = 'resnet_101'
 classes = 1108
 pic_size = 512
 experiment_name = str(use_rgb) + "_" + str(batch_size) + "_" + str(
@@ -82,12 +82,12 @@ def compute_and_display_val_metrics(engine):
 
 
 # lr_scheduler = ExponentialLR(optimizer, gamma=0.95)
-lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
+# lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
 
 
 #
 #
-# lr_scheduler = MultiStepLR(optimizer, [15, 25, 100], 0.1)
+lr_scheduler = MultiStepLR(optimizer, [15, 25, 100], 0.1)
 
 
 @trainer.on(Events.EPOCH_COMPLETED)
@@ -149,7 +149,7 @@ if not 'KAGGLE_WORKING_DIR' in os.environ:  # If we are not on kaggle server
     tb_logger.attach(trainer, log_handler=GradsHistHandler(model), event_name=Events.EPOCH_COMPLETED)
     tb_logger.close()
 
-# trainer.run(loader, max_epochs=100)
+trainer.run(loader, max_epochs=40)
 
 model.eval()
 
@@ -165,6 +165,18 @@ with torch.no_grad():
         confi = np.append(confi, confidence, axis=0)
 
 joblib.dump([confi, preds], "res.pkl")
+
+true_idx = np.empty(0)
+for i in range(19897):
+    if confi[i] > confi[i + 19897]:
+        true_idx = np.append(true_idx, idx[i])
+    else:
+        true_idx = np.append(true_idx, idx[i + 19897])
+
+
+submission = pd.read_csv('data/test.csv')
+submission['sirna'] = true_idx.astype(int)
+submission.to_csv('submission.csv', index=False, columns=['id_code', 'sirna'])
 
 # submission = pd.read_csv(path_data + '/test.csv')
 # submission['sirna'] = preds.astype(int)
