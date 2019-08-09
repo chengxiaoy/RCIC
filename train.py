@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-
 from PIL import Image
 
 import torch
@@ -92,8 +91,8 @@ lr_scheduler = MultiStepLR(optimizer, [15, 25, 100], 0.1)
 
 @trainer.on(Events.EPOCH_COMPLETED)
 def update_lr_scheduler(engine):
-    # lr_scheduler.step()
-    lr_scheduler.step(val_epoch[engine.state.epoch]['accuracy'])
+    lr_scheduler.step()
+    # lr_scheduler.step(val_epoch[engine.state.epoch]['accuracy'])
     # lr_scheduler.step(engine.state.metrics['accuracy'])
     lr = float(optimizer.param_groups[0]['lr'])
     print("Learning rate: {}".format(lr))
