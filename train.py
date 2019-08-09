@@ -169,9 +169,9 @@ joblib.dump([confi, preds], "res.pkl")
 true_idx = np.empty(0)
 for i in range(19897):
     if confi[i] > confi[i + 19897]:
-        true_idx = np.append(true_idx, idx[i])
+        true_idx = np.append(true_idx, preds[i])
     else:
-        true_idx = np.append(true_idx, idx[i + 19897])
+        true_idx = np.append(true_idx, preds[i + 19897])
 
 
 submission = pd.read_csv('data/test.csv')
