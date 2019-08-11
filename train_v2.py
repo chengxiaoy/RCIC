@@ -19,7 +19,7 @@ from datetime import datetime
 import warnings
 import sys
 from rcic_data import *
-from model import get_basic_model
+from model import get_basic_model,get_model
 import joblib
 from tensorboardX import SummaryWriter
 from datetime import datetime
@@ -43,7 +43,7 @@ experiment_name = str(use_rgb) + "_" + str(batch_size) + "_" + str(
 
 ds, ds_val, ds_test = get_dataset(use_rgb, size=pic_size)
 
-model = get_basic_model(model_name, use_rgb)
+model = get_model(model_name, use_rgb)
 model = model.to(device)
 
 model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
