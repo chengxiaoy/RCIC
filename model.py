@@ -17,6 +17,7 @@ class Identity(nn.Module):
 class My_Model(Module):
 
     def __init__(self, backbone, model_name, classes):
+        super(My_Model, self).__init__()
         self.backbone = backbone
 
         if model_name.startswith('resnet'):
