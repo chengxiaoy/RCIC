@@ -56,7 +56,7 @@ val_loader = D.DataLoader(ds_val, batch_size=batch_size, shuffle=True, num_worke
 tloader = D.DataLoader(ds_test, batch_size=batch_size, shuffle=False, num_workers=16)
 
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.0003)
 
 metrics = {
     'loss': Loss(criterion),
@@ -81,7 +81,7 @@ def compute_and_display_val_metrics(engine):
 
 
 # lr_scheduler = ExponentialLR(optimizer, gamma=0.95)
-lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.3, patience=5, verbose=True)
+lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
 
 
 #
