@@ -22,7 +22,7 @@ from datetime import datetime
 import warnings
 import sys
 from rcic_data import *
-from model import get_model
+from model import get_basic_model
 import joblib
 
 # sys.path.append('rxrx1-utils')
@@ -44,7 +44,7 @@ experiment_name = str(use_rgb) + "_" + str(batch_size) + "_" + str(
 
 ds, ds_val, ds_test = get_dataset(use_rgb, size=pic_size)
 
-model = get_model(model_name, use_rgb)
+model = get_basic_model(model_name, use_rgb)
 
 model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
 
