@@ -32,8 +32,8 @@ class My_Model(Module):
     def forward(self, input, labels):
         input = self.backbone(input)
         input = l2_norm(input)
-        output = self.head(input, labels)
-        return output
+        output, theta = self.head(input, labels)
+        return output, theta
 
     def __repr__(self):
         return self.__class__.__name__
