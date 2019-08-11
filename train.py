@@ -81,18 +81,18 @@ def compute_and_display_val_metrics(engine):
 
 
 # lr_scheduler = ExponentialLR(optimizer, gamma=0.95)
-# lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
+lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.3, patience=5, verbose=True)
 
 
 #
 #
-lr_scheduler = MultiStepLR(optimizer, [15, 25, 100], 0.1)
+# lr_scheduler = MultiStepLR(optimizer, [15, 25, 100], 0.1)
 
 
 @trainer.on(Events.EPOCH_COMPLETED)
 def update_lr_scheduler(engine):
-    lr_scheduler.step()
-    # lr_scheduler.step(val_epoch[engine.state.epoch]['accuracy'])
+    # lr_scheduler.step()
+    lr_scheduler.step(val_epoch[engine.state.epoch]['accuracy'])
     # lr_scheduler.step(engine.state.metrics['accuracy'])
     lr = float(optimizer.param_groups[0]['lr'])
     print("Learning rate: {}".format(lr))
