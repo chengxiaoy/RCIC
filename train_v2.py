@@ -44,7 +44,7 @@ experiment_name = str(use_rgb) + "_" + str(batch_size) + "_" + str(
 ds, ds_val, ds_test = get_dataset(use_rgb, size=pic_size)
 
 model = get_basic_model(model_name, use_rgb)
-model.to(device)
+model = model.to(device)
 
 model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
 
