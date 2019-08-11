@@ -32,8 +32,8 @@ warnings.filterwarnings('ignore')
 
 path_data = 'data'
 # device = 'cuda'
-device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
-batch_size = 24
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+batch_size = 48
 torch.manual_seed(0)
 use_rgb = False
 model_name = 'densenet201'
@@ -46,7 +46,7 @@ ds, ds_val, ds_test = get_dataset(use_rgb, size=pic_size)
 
 model = get_model(model_name, use_rgb)
 
-model = torch.nn.DataParallel(model, device_ids=[2, 3])
+model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
 
 # model.load_state_dict(torch.load('models/Model_False_24_512_densenet201_Aug07_13-01_35_val_acc=0.526287.pth'))
 # model = model.module
@@ -56,7 +56,7 @@ val_loader = D.DataLoader(ds_val, batch_size=batch_size, shuffle=True, num_worke
 tloader = D.DataLoader(ds_test, batch_size=batch_size, shuffle=False, num_workers=16)
 
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.0003)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 
 metrics = {
     'loss': Loss(criterion),
@@ -171,7 +171,6 @@ for i in range(19897):
         true_idx = np.append(true_idx, preds[i])
     else:
         true_idx = np.append(true_idx, preds[i + 19897])
-
 
 submission = pd.read_csv('data/test.csv')
 submission['sirna'] = true_idx.astype(int)
