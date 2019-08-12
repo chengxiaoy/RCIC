@@ -19,7 +19,7 @@ from datetime import datetime
 import warnings
 import sys
 from rcic_data import *
-from model import get_basic_model,get_model
+from model import get_basic_model, get_model
 import joblib
 from tensorboardX import SummaryWriter
 from datetime import datetime
@@ -31,8 +31,8 @@ warnings.filterwarnings('ignore')
 
 path_data = 'data'
 # device = 'cuda'
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-batch_size = 48
+device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+batch_size = 24
 torch.manual_seed(0)
 use_rgb = False
 model_name = 'densenet201'
@@ -46,7 +46,7 @@ ds, ds_val, ds_test = get_dataset(use_rgb, size=pic_size)
 model = get_model(model_name, use_rgb)
 model = model.to(device)
 
-model = torch.nn.DataParallel(model, device_ids=[0, 1, 2, 3])
+model = torch.nn.DataParallel(model, device_ids=[2, 3])
 
 # model.load_state_dict(torch.load('models/Model_False_24_512_densenet201_Aug07_13-01_35_val_acc=0.526287.pth'))
 # model = model.module
@@ -56,7 +56,7 @@ val_loader = D.DataLoader(ds_val, batch_size=batch_size, shuffle=True, num_worke
 tloader = D.DataLoader(ds_test, batch_size=batch_size, shuffle=False, num_workers=16)
 
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.0003)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 # lr_scheduler = ExponentialLR(optimizer, gamma=0.95)
 lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
 
@@ -125,30 +125,30 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
                             else:
                                 false_positive += 1
 
-            epoch_true_negative[phase] = true_negative / (len(dataloaders[phase]) * batch_size)
-            epoch_false_positive[phase] = false_positive / (len(dataloaders[phase]) * batch_size)
+            # epoch_true_negative[phase] = true_negative / (len(dataloaders[phase]) * batch_size)
+            # epoch_false_positive[phase] = false_positive / (len(dataloaders[phase]) * batch_size)
             epoch_loss[phase] = running_loss / len(dataloaders[phase])
             epoch_acc[phase] = running_corrects / (len(dataloaders[phase]) * batch_size)
 
             writer.add_text('Text', '{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss[phase], epoch_acc[phase]),
                             epoch)
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss[phase], epoch_acc[phase]))
-            print('{} true_negative:{:.4f} false_positive:{:.4f}'.format(phase, epoch_true_negative[phase],
-                                                                         epoch_false_positive[phase]))
+            # print('{} true_negative:{:.4f} false_positive:{:.4f}'.format(phase, epoch_true_negative[phase],
+            #                                                              epoch_false_positive[phase]))
 
             # deep copy the model
             if phase == 'val' and epoch_loss[phase] < min_loss:
                 min_loss = epoch_loss[phase]
-                torch.save(model.state_dict(), str(model) + "loss.pth")
+                torch.save(model.state_dict(), experiment_name + "_loss.pth")
 
             if phase == 'val' and epoch_acc[phase] > max_acc:
                 max_acc = epoch_acc[phase]
                 best_model_wts = copy.deepcopy(model.state_dict())
-                torch.save(model.state_dict(), str(model) + ".pth")
-        writer.add_scalars('data/true_negative',
-                           {'train': epoch_true_negative['train'], 'val': epoch_true_negative['val']}, epoch)
-        writer.add_scalars('data/false_positive',
-                           {'train': epoch_false_positive['train'], 'val': epoch_false_positive['val']}, epoch)
+                torch.save(model.state_dict(), experiment_name + ".pth")
+        # writer.add_scalars('data/true_negative',
+        #                    {'train': epoch_true_negative['train'], 'val': epoch_true_negative['val']}, epoch)
+        # writer.add_scalars('data/false_positive',
+        #                    {'train': epoch_false_positive['train'], 'val': epoch_false_positive['val']}, epoch)
 
         writer.add_scalars('data/loss', {'train': epoch_loss['train'], 'val': epoch_loss['val']}, epoch)
         writer.add_scalars('data/acc', {'train': epoch_acc['train'], 'val': epoch_acc['val']}, epoch)
