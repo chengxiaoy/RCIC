@@ -33,7 +33,7 @@ class My_Model(Module):
     def forward(self, input, labels):
         input = self.backbone(input)
         input = l2_norm(input)
-        output, theta = self.head(input, labels)
+        output, theta = self.head(input)
         return output, theta
 
     def __repr__(self):
