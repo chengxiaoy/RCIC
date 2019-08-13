@@ -5,7 +5,96 @@ import torch
 from collections import namedtuple
 import math
 import pdb
+from torch import nn
+from torch.autograd import Variable
 
+
+
+
+class CusAngleLinear(nn.Module):
+    def __init__(self, in_features, out_features, m=4, phiflag=True):
+        super(CusAngleLinear, self).__init__()
+        self.in_features = in_features
+        self.out_features = out_features
+        self.fc = nn.Linear(in_features, out_features, bias=False)
+        self.weight = Parameter(torch.Tensor(out_features, in_features))
+        nn.init.xavier_uniform_(self.weight)
+        self.m = m
+        self.phiflag = phiflag
+        self.mlambda = [
+            lambda x: x ** 0,
+            lambda x: x ** 1,
+            lambda x: 2 * x ** 2 - 1,
+            lambda x: 4 * x ** 3 - 3 * x,
+            lambda x: 8 * x ** 4 - 8 * x ** 2 + 1,
+            lambda x: 16 * x ** 5 - 20 * x ** 3 + 5 * x
+        ]
+
+    def forward(self, x):
+        eps = 1e-12
+
+        with torch.no_grad():
+            self.fc.weight.div_(torch.norm(self.fc.weight, dim=1, keepdim=True))
+
+        x_norm = F.normalize(x, dim=1)
+        x_len = x.norm(2, 1, True).clamp_min(eps)
+        # cos_theta = self.fc(x_norm)
+
+        # cos_theta = torch.matmul(x_norm, F.normalize(self.weight))
+
+        cos_theta = F.linear(x_norm, F.normalize(self.weight))
+
+        cos_m_theta = self.mlambda[self.m](cos_theta)
+
+        theta = Variable(cos_theta.data.acos())
+        k = (self.m * theta / math.pi).floor()
+        n_one = k * 0.0 - 1
+        phi_theta = (n_one ** k) * cos_m_theta - 2 * k
+        cos_theta = cos_theta * x_len
+        phi_theta = phi_theta * x_len
+        return cos_theta, phi_theta
+
+
+class CusAngleLoss(nn.Module):
+    def __init__(self):
+        super(CusAngleLoss, self).__init__()
+        self.iter = 0
+
+        self.LambdaMin = 5.0
+        self.LambdaMax = 1500.0
+        self.lamb = 1500.0
+        self.gamma = 0
+
+    def forward(self, input, labels):
+        self.iter += 1
+
+        target = labels.view(-1, 1)  # size=(B,1)
+        cos_theta, phi_theta = input
+        index = cos_theta.data * 0.0  # size=(B,Classnum)
+        index.scatter_(1, target.data.view(-1, 1), 1)
+        index = index.byte()
+        index = Variable(index)
+
+        # self.lamb = max(self.LambdaMin, self.LambdaMax / (1 + 0.1 * self.iter))
+        output = cos_theta * 1.0  # size=(B,Classnum)
+        # output[index] -= cos_theta[index] * (1.0 + 0) / (1 + self.lamb)
+        # output[index] += phi_theta[index] * (1.0 + 0) / (1 + self.lamb)
+
+        output[index] -= cos_theta[index] * (1.0 + 0)
+        output[index] += phi_theta[index] * (1.0 + 0)
+
+        loss = F.cross_entropy(output, target.squeeze())
+
+        # softmax loss
+
+        # logit = F.log_softmax(output)
+        #
+        # logit = logit.gather(1, target).view(-1)
+        # pt = logit.data.exp()
+        #
+        # loss = -1 * (1 - pt) ** self.gamma * logit
+        # loss = loss.mean()
+        return loss
 
 def l2_norm(input, axis=1):
     norm = torch.norm(input, 2, axis, True)

@@ -23,6 +23,7 @@ from model import get_basic_model, get_model
 import joblib
 from tensorboardX import SummaryWriter
 from datetime import datetime
+from loss.advance_loss import CusAngleLoss
 
 # sys.path.append('rxrx1-utils')
 # import rxrx.io as rio
@@ -55,8 +56,9 @@ loader = D.DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=16)
 val_loader = D.DataLoader(ds_val, batch_size=batch_size, shuffle=True, num_workers=16)
 tloader = D.DataLoader(ds_test, batch_size=batch_size, shuffle=False, num_workers=16)
 
-criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+# criterion = nn.CrossEntropyLoss()
+criterion = CusAngleLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 # lr_scheduler = ExponentialLR(optimizer, gamma=0.95)
 lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
 
@@ -102,7 +104,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
                 with torch.set_grad_enabled(phase == 'train'):
 
                     theta, theta_ = model(input, target)
-                    loss = criterion(theta, target)
+                    loss = criterion((theta, theta_), target)
 
                     if phase == 'train':
                         loss.backward()
@@ -111,24 +113,17 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
                     label = torch.max(theta_.data, 1)[1]
                     label2 = torch.max(theta.data, 1)[1]
 
-                    for i, j in zip(label, target.data.cpu().numpy()):
-                        if len(label.shape) == 1:
+                    for i, j in zip(label2, target.data.cpu().numpy()):
+                        if len(label2.shape) == 1:
                             if i == j:
                                 running_corrects += 1
-                            elif i:
-                                true_negative += 1
-                            else:
-                                false_positive += 1
+
                         else:
                             if i[0] == j[0]:
                                 running_corrects += 1
-                            elif i[0]:
-                                true_negative += 1
-                            else:
-                                false_positive += 1
 
-                    for i, j in zip(label2, target.data.cpu().numpy()):
-                        if len(label2.shape) == 1:
+                    for i, j in zip(label, target.data.cpu().numpy()):
+                        if len(label.shape) == 1:
                             if i == j:
                                 running_corrects2 += 1
                         else:

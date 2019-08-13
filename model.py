@@ -3,7 +3,7 @@ from torch import nn
 import torch
 from torch.nn import Module
 
-from loss.advance_loss import Arcface, l2_norm
+from loss.advance_loss import Arcface, l2_norm, CusAngleLinear, CusAngleLoss
 
 
 class Identity(nn.Module):
@@ -27,7 +27,8 @@ class My_Model(Module):
             self.num_ftrs = backbone.classifier.in_features
             backbone.classifier = Identity()
 
-        self.head = Arcface(embedding_size=self.num_ftrs, classnum=classes)
+        # self.head = Arcface(embedding_size=self.num_ftrs, classnum=classes)
+        self.head = CusAngleLinear(in_features=self.num_ftrs, out_features=classes)
 
     def forward(self, input, labels):
         input = self.backbone(input)
