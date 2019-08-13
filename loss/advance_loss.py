@@ -9,8 +9,6 @@ from torch import nn
 from torch.autograd import Variable
 
 
-
-
 class CusAngleLinear(nn.Module):
     def __init__(self, in_features, out_features, m=4, phiflag=True):
         super(CusAngleLinear, self).__init__()
@@ -71,7 +69,7 @@ class CusAngleLoss(nn.Module):
 
             target = labels.view(-1, 1)  # size=(B,1)
             cos_theta, phi_theta = input
-            index = cos_theta.data * 0.0  # size=(B,Classnum)
+            index = torch.empty(cos_theta.shape)  # size=(B,Classnum)
             index.scatter_(1, target.data.view(-1, 1), 1)
             index = index.byte()
             index = Variable(index)
@@ -96,6 +94,7 @@ class CusAngleLoss(nn.Module):
             # loss = -1 * (1 - pt) ** self.gamma * logit
             # loss = loss.mean()
             return loss
+
 
 def l2_norm(input, axis=1):
     norm = torch.norm(input, 2, axis, True)
@@ -141,4 +140,4 @@ class Arcface(Module):
         idx_ = torch.arange(0, nB, dtype=torch.long)
         output[idx_, label] = cos_theta_m[idx_, label]
         output *= self.s  # scale up in order to make softmax work, first introduced in normface
-        return output,cos_theta
+        return output, cos_theta
