@@ -66,35 +66,36 @@ class CusAngleLoss(nn.Module):
         self.gamma = 0
 
     def forward(self, input, labels):
-        self.iter += 1
+        with torch.autograd.set_detect_anomaly(True):
+            self.iter += 1
 
-        target = labels.view(-1, 1)  # size=(B,1)
-        cos_theta, phi_theta = input
-        index = cos_theta.data * 0.0  # size=(B,Classnum)
-        index.scatter_(1, target.data.view(-1, 1), 1)
-        index = index.byte()
-        index = Variable(index)
+            target = labels.view(-1, 1)  # size=(B,1)
+            cos_theta, phi_theta = input
+            index = cos_theta.data * 0.0  # size=(B,Classnum)
+            index.scatter_(1, target.data.view(-1, 1), 1)
+            index = index.byte()
+            index = Variable(index)
 
-        # self.lamb = max(self.LambdaMin, self.LambdaMax / (1 + 0.1 * self.iter))
-        output = cos_theta * 1.0  # size=(B,Classnum)
-        # output[index] -= cos_theta[index] * (1.0 + 0) / (1 + self.lamb)
-        # output[index] += phi_theta[index] * (1.0 + 0) / (1 + self.lamb)
+            # self.lamb = max(self.LambdaMin, self.LambdaMax / (1 + 0.1 * self.iter))
+            output = cos_theta * 1.0  # size=(B,Classnum)
+            # output[index] -= cos_theta[index] * (1.0 + 0) / (1 + self.lamb)
+            # output[index] += phi_theta[index] * (1.0 + 0) / (1 + self.lamb)
 
-        output[index] = output[index] - cos_theta[index] * (1.0 + 0)
-        output[index] = output[index] + phi_theta[index] * (1.0 + 0)
+            output[index] = output[index] - cos_theta[index] * (1.0 + 0)
+            output[index] = output[index] + phi_theta[index] * (1.0 + 0)
 
-        loss = F.cross_entropy(output, target.squeeze())
+            loss = F.cross_entropy(output, target.squeeze())
 
-        # softmax loss
+            # softmax loss
 
-        # logit = F.log_softmax(output)
-        #
-        # logit = logit.gather(1, target).view(-1)
-        # pt = logit.data.exp()
-        #
-        # loss = -1 * (1 - pt) ** self.gamma * logit
-        # loss = loss.mean()
-        return loss
+            # logit = F.log_softmax(output)
+            #
+            # logit = logit.gather(1, target).view(-1)
+            # pt = logit.data.exp()
+            #
+            # loss = -1 * (1 - pt) ** self.gamma * logit
+            # loss = loss.mean()
+            return loss
 
 def l2_norm(input, axis=1):
     norm = torch.norm(input, 2, axis, True)
