@@ -102,33 +102,33 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
                 target = target.to(device)
                 optimizer.zero_grad()
                 with torch.set_grad_enabled(phase == 'train'):
+                    with torch.autograd.set_detect_anomaly(True):
+                        theta, theta_ = model(input, target)
+                        loss = criterion((theta, theta_), target)
 
-                    theta, theta_ = model(input, target)
-                    loss = criterion((theta, theta_), target)
+                        if phase == 'train':
+                            loss.backward()
+                            optimizer.step()
+                        running_loss = running_loss + loss.item()
+                        label = torch.max(theta_.data, 1)[1]
+                        label2 = torch.max(theta.data, 1)[1]
 
-                    if phase == 'train':
-                        loss.backward()
-                        optimizer.step()
-                    running_loss = running_loss + loss.item()
-                    label = torch.max(theta_.data, 1)[1]
-                    label2 = torch.max(theta.data, 1)[1]
+                        for i, j in zip(label2, target.data.cpu().numpy()):
+                            if len(label2.shape) == 1:
+                                if i == j:
+                                    running_corrects += 1
 
-                    for i, j in zip(label2, target.data.cpu().numpy()):
-                        if len(label2.shape) == 1:
-                            if i == j:
-                                running_corrects += 1
+                            else:
+                                if i[0] == j[0]:
+                                    running_corrects += 1
 
-                        else:
-                            if i[0] == j[0]:
-                                running_corrects += 1
-
-                    for i, j in zip(label, target.data.cpu().numpy()):
-                        if len(label.shape) == 1:
-                            if i == j:
-                                running_corrects2 += 1
-                        else:
-                            if i[0] == j[0]:
-                                running_corrects2 += 1
+                        for i, j in zip(label, target.data.cpu().numpy()):
+                            if len(label.shape) == 1:
+                                if i == j:
+                                    running_corrects2 += 1
+                            else:
+                                if i[0] == j[0]:
+                                    running_corrects2 += 1
 
             # epoch_true_negative[phase] = true_negative / (len(dataloaders[phase]) * batch_size)
             # epoch_false_positive[phase] = false_positive / (len(dataloaders[phase]) * batch_size)
