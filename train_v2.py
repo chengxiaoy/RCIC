@@ -57,7 +57,7 @@ val_loader = D.DataLoader(ds_val, batch_size=batch_size, shuffle=True, num_worke
 tloader = D.DataLoader(ds_test, batch_size=batch_size, shuffle=False, num_workers=16)
 
 # criterion = nn.CrossEntropyLoss()
-criterion = CusAngleLoss()
+criterion = CusAngleLoss().to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 # lr_scheduler = ExponentialLR(optimizer, gamma=0.95)
 lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
