@@ -73,15 +73,15 @@ class CusAngleLoss(nn.Module):
         index = cos_theta.data * 0.0  # size=(B,Classnum)
         index.scatter_(1, target.data.view(-1, 1), 1)
         index = index.byte()
-        # index = Variable(index)
+        index = Variable(index)
 
         # self.lamb = max(self.LambdaMin, self.LambdaMax / (1 + 0.1 * self.iter))
         output = cos_theta * 1.0  # size=(B,Classnum)
         # output[index] -= cos_theta[index] * (1.0 + 0) / (1 + self.lamb)
         # output[index] += phi_theta[index] * (1.0 + 0) / (1 + self.lamb)
 
-        output[index] -= cos_theta[index] * (1.0 + 0)
-        output[index] += phi_theta[index] * (1.0 + 0)
+        output[index] = output[index] - cos_theta[index] * (1.0 + 0)
+        output[index] = output[index] + phi_theta[index] * (1.0 + 0)
 
         loss = F.cross_entropy(output, target.squeeze())
 
