@@ -7,6 +7,7 @@ import math
 import pdb
 from torch import nn
 from torch.autograd import Variable
+device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
 
 class CusAngleLinear(nn.Module):
@@ -69,7 +70,7 @@ class CusAngleLoss(nn.Module):
 
             target = labels.view(-1, 1)  # size=(B,1)
             cos_theta, phi_theta = input
-            index = torch.empty(cos_theta.shape)  # size=(B,Classnum)
+            index = torch.empty(cos_theta.shape).to(device)  # size=(B,Classnum)
             index.scatter_(1, target.data.view(-1, 1), 1)
             index = index.byte()
             index = Variable(index)
