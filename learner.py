@@ -59,7 +59,8 @@ tloader = D.DataLoader(ds_test, batch_size=config.val_batch_size, shuffle=False,
 
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-lr_scheduler = ExponentialLR(optimizer, gamma=0.95)
+# lr_scheduler = ExponentialLR(optimizer, gamma=0.95)
+lr_scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5, verbose=True)
 
 experiment_name = datetime.now().strftime('%b%d_%H-%M') + "_" + str(config)
 writer = SummaryWriter(logdir=os.path.join("board/", experiment_name))
@@ -92,7 +93,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
                 writer.add_text('Text', '{} Loss: {:.4f} '.format(phase, epoch_loss),
                                 epoch)
                 print('{} Loss: {:.4f} '.format(phase, epoch_loss))
-                scheduler.step()
+
             else:
                 model.eval()
                 embeddings = []
@@ -119,6 +120,8 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
                 if epoch_loss < min_loss:
                     min_loss = epoch_loss
                     torch.save(model.state_dict(), 'models/' + experiment_name + ".pth")
+
+                scheduler.step(epoch_loss)
 
 
 def board_val(writer, accuracy, best_threshold, roc_curve_tensor, step):
