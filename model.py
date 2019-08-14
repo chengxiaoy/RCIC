@@ -16,7 +16,7 @@ class Identity(nn.Module):
 
 class My_Model(Module):
 
-    def __init__(self, backbone, model_name, classes):
+    def __init__(self, backbone, model_name, classes, head_type='line'):
         super(My_Model, self).__init__()
         self.backbone = backbone
 
@@ -27,22 +27,30 @@ class My_Model(Module):
             self.num_ftrs = backbone.classifier.in_features
             backbone.classifier = Identity()
 
-        # self.head = Arcface(embedding_size=self.num_ftrs, classnum=classes)
-        self.head = CusAngleLinear(in_features=self.num_ftrs, out_features=classes)
+        self.head_type = head_type
+
+        if head_type == 'line':
+            self.head = nn.Linear(self.num_ftrs, classes)
+        elif head_type == 'arcface':
+            self.head = Arcface(embedding_size=self.num_ftrs, classnum=classes)
 
     def forward(self, input, labels):
-        input = self.backbone(input)
-        input = l2_norm(input)
-        output, theta = self.head(input)
-        return output, theta
+        output = self.backbone(input)
+        if self.head_type == 'arcface':
+            output = l2_norm(output)
+            if self.training:
+                output = self.head(output, labels)
+            return output
+        output = self.head(output)
+        return output
 
     def __repr__(self):
         return self.__class__.__name__
 
 
-def get_model(model_name, use_rgb, classes=1108, pretrained=True):
+def get_model(model_name, use_rgb, head_type, classes=1108, pretrained=True):
     backbone = get_backbone(model_name, use_rgb, classes, pretrained)
-    my_model = My_Model(backbone, model_name, classes)
+    my_model = My_Model(backbone, model_name, classes, head_type)
     return my_model
 
 
