@@ -119,6 +119,8 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
                 embeddings = torch.cat(embeddings)
                 labels = torch.cat(labels)
                 accuracy, best_threshold, roc_curve_tensor = facade(embeddings, labels)
+                print('{} acc: {:.4f} '.format(phase, accuracy))
+
                 board_val(writer, accuracy, best_threshold, roc_curve_tensor, epoch)
 
                 if epoch_loss < min_loss:
