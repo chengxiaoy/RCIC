@@ -90,6 +90,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
                         running_loss = running_loss + loss.item()
 
                 epoch_loss = running_loss / len(dataloaders[phase])
+                writer.add_scalar('train_loss', epoch_loss, epoch)
                 writer.add_text('Text', '{} Loss: {:.4f} '.format(phase, epoch_loss),
                                 epoch)
                 print('{} Loss: {:.4f} '.format(phase, epoch_loss))
@@ -109,6 +110,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
                         loss = criterion(embedding, target)
                         running_loss = running_loss + loss.item()
                 epoch_loss = running_loss / len(dataloaders[phase])
+                writer.add_scalar('val_loss', epoch_loss, epoch)
                 writer.add_text('Text', '{} Loss: {:.4f} '.format(phase, epoch_loss),
                                 epoch)
                 print('{} Loss: {:.4f} '.format(phase, epoch_loss))
