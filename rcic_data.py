@@ -40,6 +40,7 @@ def val_pair(df_val):
         sirna_index[i].remove(index1)
         sirna_index[i].remove(index2)
         left_index.extend(sirna_index[i])
+    random.shuffle(left_index)
     for index in left_index:
         val.append(df_val.iloc[index])
 
@@ -54,7 +55,7 @@ def val_pair(df_val):
 def get_dataset(rgb=True, size=512):
     if rgb:
         rgb_df = pd.read_csv(rgb_train_csv_path)
-        df_train, df_val = train_test_split(rgb_df, test_size=0.1, stratify=rgb_df.sirna, random_state=42)
+        df_train, df_val = train_test_split(rgb_df, test_size=0.12, stratify=rgb_df.sirna, random_state=42)
         df_test = pd.read_csv(rgb_test_csv_path)
 
         # build same pair for metric in val phase
@@ -67,7 +68,7 @@ def get_dataset(rgb=True, size=512):
         return ds, ds_val, ds_test
     else:
         rgb_df = pd.read_csv(train_csv_path)
-        df_train, df_val = train_test_split(rgb_df, test_size=0.1, stratify=rgb_df.sirna, random_state=42)
+        df_train, df_val = train_test_split(rgb_df, test_size=0.12, stratify=rgb_df.sirna, random_state=42)
         df_test = pd.read_csv(test_csv_path)
         # build same pair for metric in val phase
         val = val_pair(df_val)

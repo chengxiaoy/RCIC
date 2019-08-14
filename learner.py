@@ -120,6 +120,8 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
                 labels = torch.cat(labels)
                 accuracy, best_threshold, roc_curve_tensor = facade(embeddings, labels)
                 print('{} acc: {:.4f} '.format(phase, accuracy))
+                print('{} thr: {:.4f} '.format(phase, best_threshold))
+
 
                 board_val(writer, accuracy, best_threshold, roc_curve_tensor, epoch)
 
