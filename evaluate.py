@@ -177,11 +177,13 @@ def evaluate(embeddings, actual_issame, nrof_folds=10, pca=0):
 def facade(embeddings, labels):
     print(labels.shape)
     print(embeddings.shape)
+    labels = np.array(labels.cpu().numpy())
+    embeddings = np.array(embeddings.cpu().numpy())
     assert len(embeddings) == len(labels)
     if len(labels) % 2 != 0:
         embeddings = embeddings[:-1]
         labels = labels[:-1]
-    labels = np.array(labels.cpu().numpy())
+
     labels1 = labels[0::2]
     labels2 = labels[1::2]
     issame = []
