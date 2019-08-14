@@ -118,7 +118,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
 
                 if epoch_loss < min_loss:
                     min_loss = epoch_loss
-                    torch.save(model.state_dict(), experiment_name + ".pth")
+                    torch.save(model.state_dict(), 'model/' + experiment_name + ".pth")
 
 
 def board_val(writer, accuracy, best_threshold, roc_curve_tensor, step):
