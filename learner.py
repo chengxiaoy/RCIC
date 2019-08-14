@@ -100,8 +100,6 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
                 embeddings = []
                 labels = []
                 for i, (input, target) in enumerate(dataloaders[phase]):
-                    print("iteration {}".format(i))
-                    print("target is {}".format(target))
                     input = input.to(device)
                     target = target.to(device)
                     optimizer.zero_grad()
