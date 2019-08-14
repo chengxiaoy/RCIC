@@ -193,6 +193,10 @@ def facade(embeddings, labels):
             issame.append(1)
         else:
             issame.append(0)
+
+    issame = np.asarray(issame)
+    n_same = np.sum(issame)
+    print("the same num {}".format(n_same))
     tpr, fpr, accuracy, best_thresholds = evaluate(embeddings, issame)
     buf = gen_plot(fpr, tpr)
     roc_curve = Image.open(buf)
