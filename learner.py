@@ -110,7 +110,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
                         loss = criterion(embedding, target)
                         running_loss = running_loss + loss.item()
                 epoch_loss = running_loss / len(dataloaders[phase])
-                writer.add_scalar('val_loss', epoch_loss, epoch)
+                writer.add_scalar('val/loss', epoch_loss, epoch)
                 writer.add_text('Text', '{} Loss: {:.4f} '.format(phase, epoch_loss),
                                 epoch)
                 print('{} Loss: {:.4f} '.format(phase, epoch_loss))
@@ -127,7 +127,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
 
 
 def board_val(writer, accuracy, best_threshold, roc_curve_tensor, step):
-    writer.add_scalar('accuracy', accuracy, step)
+    writer.add_scalar('val/accuracy', accuracy, step)
     writer.add_scalar('best_threshold', best_threshold, step)
     writer.add_image('roc_curve', roc_curve_tensor, step)
 
