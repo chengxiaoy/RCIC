@@ -75,7 +75,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
 
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
         print('-' * 10)
-        for phase in ['train', 'val']:
+        for phase in ['val', 'train']:
             if phase == 'train':
                 model.train()  # Set model to training mode
                 for i, (input, target) in enumerate(dataloaders[phase]):
