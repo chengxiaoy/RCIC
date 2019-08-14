@@ -29,7 +29,6 @@ from sklearn.decomposition import PCA
 import sklearn
 from scipy import interpolate
 
-
 from PIL import Image
 from torchvision import transforms as trans
 import io
@@ -177,7 +176,7 @@ def evaluate(embeddings, actual_issame, nrof_folds=10, pca=0):
 
 def facade(embeddings, labels):
     assert len(embeddings) == len(labels)
-    if labels % 2 != 0:
+    if len(labels) % 2 != 0:
         embeddings = embeddings[:-1]
         labels = labels[:-1]
     labels = np.array(labels)
