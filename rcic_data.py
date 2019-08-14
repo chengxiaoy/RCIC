@@ -13,6 +13,8 @@ import torchvision
 from sklearn.model_selection import train_test_split
 import os
 import sys
+from collections import defaultdict
+from random import sample, choice
 
 rgb_train_csv_path = 'new_train.csv'
 rgb_test_csv_path = 'new_test.csv'
@@ -22,14 +24,44 @@ test_csv_path = './data/test.csv'
 img_dir = './data'
 
 
+def val_pair(df_val):
+    # build same pair for metric in val phase
+    sirna_val = np.array(df_val.sirna)
+    sirna_index = defaultdict(list)
+    for i, sirna in enumerate(sirna_val):
+        sirna_index[sirna].append(i)
+
+    val = []
+    left_index = []
+    for i in range(1108):
+        index1, index2 = sample(sirna_index[i], 2)
+        val.append(df_val.iloc[index1])
+        val.append(df_val.iloc[index2])
+        sirna_index[i].remove(index1)
+        sirna_index[i].remove(index2)
+        left_index.extend(sirna_index[i])
+    for index in left_index:
+        val.append(df_val.iloc[index])
+
+    if len(val) % 2 == 1:
+        val.remove(val[-1])
+
+    val = pd.concat(val, ignore_index=True, axis=1).T
+    print(val.shape)
+    return val
+
+
 def get_dataset(rgb=True, size=512):
     if rgb:
         rgb_df = pd.read_csv(rgb_train_csv_path)
         df_train, df_val = train_test_split(rgb_df, test_size=0.1, stratify=rgb_df.sirna, random_state=42)
         df_test = pd.read_csv(rgb_test_csv_path)
 
+        # build same pair for metric in val phase
+        val = val_pair(df_val)
+
         ds = ImagesDS(df_train, 'train', True, mode='train', augmentation=True, size=size)
-        ds_val = ImagesDS(df_val, 'train', True, mode='train', size=size)
+        ds_val = ImagesDS(val, 'train', True, mode='train', size=size)
         ds_test = ImagesDS(df_test, 'test', True, mode='test', size=size)
 
         return ds, ds_val, ds_test
@@ -37,8 +69,11 @@ def get_dataset(rgb=True, size=512):
         rgb_df = pd.read_csv(train_csv_path)
         df_train, df_val = train_test_split(rgb_df, test_size=0.1, stratify=rgb_df.sirna, random_state=42)
         df_test = pd.read_csv(test_csv_path)
+        # build same pair for metric in val phase
+        val = val_pair(df_val)
+
         ds = ImagesDS(df_train, img_dir, False, mode='train', augmentation=True, size=size)
-        ds_val = ImagesDS(df_val, img_dir, False, mode='train', size=size)
+        ds_val = ImagesDS(val, img_dir, False, mode='train', size=size)
         ds_test = ImagesDS(df_test, img_dir, False, mode='test', size=size)
         return ds, ds_val, ds_test
 

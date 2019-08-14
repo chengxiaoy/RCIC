@@ -54,7 +54,7 @@ model = torch.nn.DataParallel(model, device_ids=[2, 3])
 # data part
 ds, ds_val, ds_test = get_dataset(config.use_rgb, size=config.pic_size)
 loader = D.DataLoader(ds, batch_size=config.train_batch_size, shuffle=True, num_workers=16)
-val_loader = D.DataLoader(ds_val, batch_size=config.val_batch_size, shuffle=True, num_workers=16)
+val_loader = D.DataLoader(ds_val, batch_size=config.val_batch_size, shuffle=False, num_workers=16)
 tloader = D.DataLoader(ds_test, batch_size=config.val_batch_size, shuffle=False, num_workers=16)
 
 criterion = nn.CrossEntropyLoss()
@@ -75,7 +75,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
 
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
         print('-' * 10)
-        for phase in ['train', 'val']:
+        for phase in ['val','train']:
             if phase == 'train':
                 model.train()  # Set model to training mode
                 for i, (input, target) in enumerate(dataloaders[phase]):
@@ -100,6 +100,8 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
                 embeddings = []
                 labels = []
                 for i, (input, target) in enumerate(dataloaders[phase]):
+                    print("iteration {}".format(i))
+                    print("target is {}".format(target))
                     input = input.to(device)
                     target = target.to(device)
                     optimizer.zero_grad()
@@ -157,7 +159,35 @@ train_labels = torch.cat(train_labels)
 train_labels = np.array(train_labels.cpu().numpy())
 train_embeddings = np.array(train_embeddings.cpu().numpy())
 
+center_features = []
+for i in range(1108):
+    index = train_labels == i
+    center_feature = np.mean(train_embeddings[index], axis=0)
+    center_features.append(center_feature)
 
-train_csv_path = './data/train.csv'
-df = pd.read_csv(train_csv_path)
-rgb_df.sirna.unique()
+center_features = np.array(center_features)
+
+test_embeddings = []
+for i, (input, target) in enumerate(tloader):
+    nput = input.to(device)
+    target = target.to(device)
+    embedding = model(input, target)
+    test_embeddings.append(embedding)
+
+assert len(test_embeddings) == 19897 * 2
+from sklearn.metrics.pairwise import cosine_similarity
+
+similarity = cosine_similarity(test_embeddings, center_features)
+confi = similarity.max(axis=1)
+preds = similarity.argmax(axis=1)
+
+true_idx = np.empty(0)
+for i in range(19897):
+    if confi[i] > confi[i + 19897]:
+        true_idx = np.append(true_idx, preds[i])
+    else:
+        true_idx = np.append(true_idx, preds[i + 19897])
+
+submission = pd.read_csv('data/test.csv')
+submission['sirna'] = true_idx.astype(int)
+submission.to_csv('submission.csv', index=False, columns=['id_code', 'sirna'])
