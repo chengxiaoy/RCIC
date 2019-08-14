@@ -180,6 +180,7 @@ def facade(embeddings, labels):
         embeddings = embeddings[:-1]
         labels = labels[:-1]
     labels = np.array(labels.cpu().numpy)
+    print(labels.shape)
     labels1 = labels[0::2]
     labels2 = labels[1::2]
     issame = []
