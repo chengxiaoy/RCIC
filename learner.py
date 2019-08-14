@@ -37,7 +37,7 @@ class Config():
     backbone = 'densenet201'
     head_type = 'arcface'
     classes = 1108
-    pic_size = 512
+    pic_size = 384
 
     def __repr__(self):
         return "batch_size_{}_picsize_{}_backbone_{}_head_{}_rgb_{}".format(
