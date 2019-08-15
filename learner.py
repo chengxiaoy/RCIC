@@ -51,7 +51,8 @@ model = get_model(config.backbone, config.use_rgb, config.head_type)
 model = model.to(device)
 model = torch.nn.DataParallel(model, device_ids=[2, 3])
 
-model.load_state_dict(torch.load('models/Aug14_15-43_batch_size_24_picsize_384_backbone_densenet201_head_arcface_rgb_False.pth'))
+model.load_state_dict(
+    torch.load('models/Aug14_15-43_batch_size_24_picsize_384_backbone_densenet201_head_arcface_rgb_False.pth'))
 # model = model.module
 
 # data part
@@ -74,13 +75,12 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
     max_acc = 0.0
     best_model_wts = copy.deepcopy(model.state_dict())
 
-
     for epoch in range(num_epochs):
         running_loss = 0.0
 
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
         print('-' * 10)
-        for phase in ['train','val']:
+        for phase in ['train', 'val']:
             if phase == 'train':
                 model.train()  # Set model to training mode
                 for i, (input, target) in enumerate(dataloaders[phase]):
@@ -125,16 +125,12 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
                 print('{} acc: {:.4f} '.format(phase, accuracy))
                 print('{} thr: {:.4f} '.format(phase, best_threshold))
 
-
                 board_val(writer, accuracy, best_threshold, roc_curve_tensor, epoch)
 
-
-                if accuracy>max_acc:
+                if accuracy > max_acc:
                     max_acc = accuracy
                     torch.save(model.state_dict(), 'models/' + experiment_name + ".pth")
                     best_model_wts = copy.deepcopy(model.state_dict())
-
-
 
                 # if epoch_loss < min_loss:
                 #     min_loss = epoch_loss
@@ -175,7 +171,6 @@ with torch.no_grad():
     train_embeddings = np.concatenate(train_embeddings)
     train_labels = np.concatenate(train_labels)
 
-
     train_labels = np.array(train_labels)
     train_embeddings = np.array(train_embeddings)
 
@@ -187,13 +182,19 @@ with torch.no_grad():
 
     center_features = np.array(center_features)
 
+    joblib.dump(train_embeddings, "train_embeddings.pkl")
+    joblib.dump(train_labels, 'train_labels.pkl')
+    joblib.dump(center_features, 'center_features.pkl')
+
     test_embeddings = []
     for i, (input, target) in enumerate(tloader):
         nput = input.to(device)
-        target = target.to(device)
+        # target = target.to(device)
         embedding = model(input, target).cpu().numpy()
         test_embeddings.append(embedding)
     test_embeddings = np.concatenate(test_embeddings)
+
+    joblib.dump(test_embeddings, 'test_embeddings.pkl')
 
     assert len(test_embeddings) == 19897 * 2
     from sklearn.metrics.pairwise import cosine_similarity
