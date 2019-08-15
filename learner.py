@@ -51,8 +51,7 @@ model = get_model(config.backbone, config.use_rgb, config.head_type)
 model = model.to(device)
 model = torch.nn.DataParallel(model, device_ids=[2, 3])
 
-model.load_state_dict(
-    torch.load('models/Aug14_15-43_batch_size_24_picsize_384_backbone_densenet201_head_arcface_rgb_False.pth'))
+# model.load_state_dict(torch.load('models/Aug14_15-43_batch_size_24_picsize_384_backbone_densenet201_head_arcface_rgb_False.pth'))
 # model = model.module
 
 # data part
