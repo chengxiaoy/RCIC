@@ -51,6 +51,9 @@ model = get_model(config.backbone, config.use_rgb, config.head_type)
 model = model.to(device)
 model = torch.nn.DataParallel(model, device_ids=[2, 3])
 
+model.load_state_dict(torch.load('models/Aug14_15-43_batch_size_24_picsize_384_backbone_densenet201_head_arcface_rgb_False.pth'))
+# model = model.module
+
 # data part
 ds, ds_val, ds_test = get_dataset(config.use_rgb, size=config.pic_size)
 loader = D.DataLoader(ds, batch_size=config.train_batch_size, shuffle=True, num_workers=16)
@@ -157,21 +160,23 @@ model.eval()
 for i, (input, target) in enumerate(loader):
     input = input.to(device)
     target = target.to(device)
-    embedding = model(input, target)
+    embedding = model(input, target).cpu().numpy()
     train_embeddings.append(embedding)
-    train_labels.append(target)
+    train_labels.append(target.cpu().numpy())
 
 for i, (input, target) in enumerate(val_loader):
     input = input.to(device)
     target = target.to(device)
-    embedding = model(input, target)
+    embedding = model(input, target).cpu().numpy()
     train_embeddings.append(embedding)
-    train_labels.append(target)
+    train_labels.append(target.cpu().numpy())
 
-train_embeddings = torch.cat(train_embeddings)
-train_labels = torch.cat(train_labels)
-train_labels = np.array(train_labels.cpu().numpy())
-train_embeddings = np.array(train_embeddings.cpu().numpy())
+train_embeddings = np.concatenate(train_embeddings)
+train_labels = np.concatenate(train_labels)
+
+
+train_labels = np.array(train_labels)
+train_embeddings = np.array(train_embeddings)
 
 center_features = []
 for i in range(1108):
@@ -185,8 +190,9 @@ test_embeddings = []
 for i, (input, target) in enumerate(tloader):
     nput = input.to(device)
     target = target.to(device)
-    embedding = model(input, target)
+    embedding = model(input, target).cpu().numpy()
     test_embeddings.append(embedding)
+test_embeddings = np.concatenate(test_embeddings)
 
 assert len(test_embeddings) == 19897 * 2
 from sklearn.metrics.pairwise import cosine_similarity
