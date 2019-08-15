@@ -157,56 +157,57 @@ train_embeddings = []
 train_labels = []
 
 model.eval()
-for i, (input, target) in enumerate(loader):
-    input = input.to(device)
-    target = target.to(device)
-    embedding = model(input, target).cpu().numpy()
-    train_embeddings.append(embedding)
-    train_labels.append(target.cpu().numpy())
+with torch.no_grad():
+    for i, (input, target) in enumerate(loader):
+        input = input.to(device)
+        target = target.to(device)
+        embedding = model(input, target).cpu().numpy()
+        train_embeddings.append(embedding)
+        train_labels.append(target.cpu().numpy())
 
-for i, (input, target) in enumerate(val_loader):
-    input = input.to(device)
-    target = target.to(device)
-    embedding = model(input, target).cpu().numpy()
-    train_embeddings.append(embedding)
-    train_labels.append(target.cpu().numpy())
+    for i, (input, target) in enumerate(val_loader):
+        input = input.to(device)
+        target = target.to(device)
+        embedding = model(input, target).cpu().numpy()
+        train_embeddings.append(embedding)
+        train_labels.append(target.cpu().numpy())
 
-train_embeddings = np.concatenate(train_embeddings)
-train_labels = np.concatenate(train_labels)
+    train_embeddings = np.concatenate(train_embeddings)
+    train_labels = np.concatenate(train_labels)
 
 
-train_labels = np.array(train_labels)
-train_embeddings = np.array(train_embeddings)
+    train_labels = np.array(train_labels)
+    train_embeddings = np.array(train_embeddings)
 
-center_features = []
-for i in range(1108):
-    index = train_labels == i
-    center_feature = np.mean(train_embeddings[index], axis=0)
-    center_features.append(center_feature)
+    center_features = []
+    for i in range(1108):
+        index = train_labels == i
+        center_feature = np.mean(train_embeddings[index], axis=0)
+        center_features.append(center_feature)
 
-center_features = np.array(center_features)
+    center_features = np.array(center_features)
 
-test_embeddings = []
-for i, (input, target) in enumerate(tloader):
-    nput = input.to(device)
-    target = target.to(device)
-    embedding = model(input, target).cpu().numpy()
-    test_embeddings.append(embedding)
-test_embeddings = np.concatenate(test_embeddings)
+    test_embeddings = []
+    for i, (input, target) in enumerate(tloader):
+        nput = input.to(device)
+        target = target.to(device)
+        embedding = model(input, target).cpu().numpy()
+        test_embeddings.append(embedding)
+    test_embeddings = np.concatenate(test_embeddings)
 
-assert len(test_embeddings) == 19897 * 2
-from sklearn.metrics.pairwise import cosine_similarity
+    assert len(test_embeddings) == 19897 * 2
+    from sklearn.metrics.pairwise import cosine_similarity
 
-similarity = cosine_similarity(test_embeddings, center_features)
-confi = similarity.max(axis=1)
-preds = similarity.argmax(axis=1)
+    similarity = cosine_similarity(test_embeddings, center_features)
+    confi = similarity.max(axis=1)
+    preds = similarity.argmax(axis=1)
 
-true_idx = np.empty(0)
-for i in range(19897):
-    if confi[i] > confi[i + 19897]:
-        true_idx = np.append(true_idx, preds[i])
-    else:
-        true_idx = np.append(true_idx, preds[i + 19897])
+    true_idx = np.empty(0)
+    for i in range(19897):
+        if confi[i] > confi[i + 19897]:
+            true_idx = np.append(true_idx, preds[i])
+        else:
+            true_idx = np.append(true_idx, preds[i + 19897])
 
 submission = pd.read_csv('data/test.csv')
 submission['sirna'] = true_idx.astype(int)
