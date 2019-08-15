@@ -69,6 +69,8 @@ writer = SummaryWriter(logdir=os.path.join("board/", experiment_name))
 def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num_epochs):
     min_loss = float('inf')
     max_acc = 0.0
+    best_model_wts = copy.deepcopy(model.state_dict())
+
 
     for epoch in range(num_epochs):
         running_loss = 0.0
@@ -123,11 +125,21 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
 
                 board_val(writer, accuracy, best_threshold, roc_curve_tensor, epoch)
 
-                if epoch_loss < min_loss:
-                    min_loss = epoch_loss
+
+                if accuracy>max_acc:
+                    max_acc = accuracy
                     torch.save(model.state_dict(), 'models/' + experiment_name + ".pth")
+                    best_model_wts = copy.deepcopy(model.state_dict())
+
+
+
+                # if epoch_loss < min_loss:
+                #     min_loss = epoch_loss
+                #     torch.save(model.state_dict(), 'models/' + experiment_name + ".pth")
 
                 scheduler.step(accuracy)
+
+    model.load_state_dict(best_model_wts)
 
 
 def board_val(writer, accuracy, best_threshold, roc_curve_tensor, step):
@@ -136,7 +148,7 @@ def board_val(writer, accuracy, best_threshold, roc_curve_tensor, step):
     writer.add_image('roc_curve', roc_curve_tensor, step)
 
 
-train_model(model, criterion, optimizer, lr_scheduler, {'train': loader, 'val': val_loader}, writer, 50)
+# train_model(model, criterion, optimizer, lr_scheduler, {'train': loader, 'val': val_loader}, writer, 50)
 
 train_embeddings = []
 train_labels = []
