@@ -158,7 +158,7 @@ def board_val(writer, accuracy, best_threshold, roc_curve_tensor, step):
     writer.add_image('roc_curve', roc_curve_tensor, step)
 
 
-# train_model(model, criterion, optimizer, lr_scheduler, {'train': loader, 'val': val_loader}, writer, 50)
+train_model(model, criterion, optimizer, lr_scheduler, {'train': loader, 'val': val_loader}, writer, 50)
 
 train_embeddings = []
 train_labels = []
