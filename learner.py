@@ -29,8 +29,8 @@ device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
 
 class Config():
-    train_batch_size = 24
-    val_batch_size = 24
+    train_batch_size = 32
+    val_batch_size = 32
 
     device_ids = [2, 3]
     use_rgb = False
@@ -51,8 +51,7 @@ model = get_model(config.backbone, config.use_rgb, config.head_type)
 model = model.to(device)
 model = torch.nn.DataParallel(model, device_ids=[2, 3])
 
-model.load_state_dict(
-    torch.load('models/Aug14_15-43_batch_size_24_picsize_384_backbone_densenet201_head_arcface_rgb_False.pth'))
+# model.load_state_dict(torch.load('models/Aug14_15-43_batch_size_24_picsize_384_backbone_densenet201_head_arcface_rgb_False.pth'))
 # model = model.module
 
 # data part
@@ -77,6 +76,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
 
     for epoch in range(num_epochs):
         running_loss = 0.0
+        running_corrects = 0
 
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
         print('-' * 10)
@@ -93,12 +93,22 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
                         loss.backward()
                         optimizer.step()
                         running_loss = running_loss + loss.item()
+                        label = torch.max(embedding.data, 1)[1]
+
+                        for i, j in zip(label, target.data.cpu().numpy()):
+                            if len(label.shape) == 1:
+                                if i == j:
+                                    running_corrects += 1
+                            else:
+                                if i[0] == j[0]:
+                                    running_corrects += 1
 
                 epoch_loss = running_loss / len(dataloaders[phase])
-                writer.add_scalar('train_loss', epoch_loss, epoch)
+                writer.add_scalar('train/loss', epoch_loss, epoch)
                 writer.add_text('Text', '{} Loss: {:.4f} '.format(phase, epoch_loss),
                                 epoch)
                 print('{} Loss: {:.4f} '.format(phase, epoch_loss))
+                print('{} theta Acc: {:.4f}'.format(phase, running_corrects / (len(dataloaders[phase]) * config.train_batch_size)))
 
             else:
                 model.eval()
@@ -147,7 +157,7 @@ def board_val(writer, accuracy, best_threshold, roc_curve_tensor, step):
     writer.add_image('roc_curve', roc_curve_tensor, step)
 
 
-# train_model(model, criterion, optimizer, lr_scheduler, {'train': loader, 'val': val_loader}, writer, 50)
+train_model(model, criterion, optimizer, lr_scheduler, {'train': loader, 'val': val_loader}, writer, 50)
 
 train_embeddings = []
 train_labels = []
