@@ -110,18 +110,25 @@ class Arcface(Module):
         self.classnum = classnum
         self.kernel = Parameter(torch.Tensor(embedding_size, classnum))
         # initial kernel
-        self.kernel.data.uniform_(-1, 1).renorm_(2, 1, 1e-5).mul_(1e5)
+        # self.kernel.data.uniform_(-1, 1).renorm_(2, 1, 1e-5).mul_(1e5)
+
+        stdv = 1. / math.sqrt(self.kernel.size(1))
+        self.kernel.data.uniform_(-stdv, stdv)
+
         self.m = m  # the margin value, default is 0.5
         self.s = s  # scalar value default is 64, see normface https://arxiv.org/abs/1704.06369
         self.cos_m = math.cos(m)
         self.sin_m = math.sin(m)
-        self.mm = self.sin_m * m  # issue 1
+        # self.mm = self.sin_m * m  # issue 1
+        self.mm = math.sin(math.pi - m) * m
+
         self.threshold = math.cos(math.pi - m)
 
     def forward(self, embbedings, label):
         # weights norm
         nB = len(embbedings)
-        kernel_norm = l2_norm(self.kernel, axis=0)
+        # kernel_norm = l2_norm(self.kernel, axis=0)
+        kernel_norm = F.normalize(self.kernel.cuda())
         # cos(theta+m)
         cos_theta = torch.mm(embbedings, kernel_norm)
         #         output = torch.mm(embbedings,kernel_norm)
