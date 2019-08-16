@@ -146,7 +146,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
                 #     min_loss = epoch_loss
                 #     torch.save(model.state_dict(), 'models/' + experiment_name + ".pth")
 
-                scheduler.step(accuracy)
+                # scheduler.step(accuracy)
 
     model.load_state_dict(best_model_wts)
 
