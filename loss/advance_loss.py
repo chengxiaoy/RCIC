@@ -127,8 +127,8 @@ class Arcface(Module):
     def forward(self, embbedings, label):
         # weights norm
         nB = len(embbedings)
-        # kernel_norm = l2_norm(self.kernel, axis=0)
-        kernel_norm = F.normalize(self.kernel.cuda())
+        kernel_norm = l2_norm(self.kernel, axis=0)
+        # kernel_norm = F.normalize(self.kernel.cuda())
         # cos(theta+m)
         cos_theta = torch.mm(embbedings, kernel_norm)
         #         output = torch.mm(embbedings,kernel_norm)
