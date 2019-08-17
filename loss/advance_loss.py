@@ -110,10 +110,10 @@ class Arcface(Module):
         self.classnum = classnum
         self.kernel = Parameter(torch.Tensor(embedding_size, classnum))
         # initial kernel
-        # self.kernel.data.uniform_(-1, 1).renorm_(2, 1, 1e-5).mul_(1e5)
+        self.kernel.data.uniform_(-1, 1).renorm_(2, 1, 1e-5).mul_(1e5)
 
-        stdv = 1. / math.sqrt(self.kernel.size(1))
-        self.kernel.data.uniform_(-stdv, stdv)
+        # stdv = 1. / math.sqrt(self.kernel.size(1))
+        # self.kernel.data.uniform_(-stdv, stdv)
 
         self.m = m  # the margin value, default is 0.5
         self.s = s  # scalar value default is 64, see normface https://arxiv.org/abs/1704.06369
