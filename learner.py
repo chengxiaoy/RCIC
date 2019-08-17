@@ -61,7 +61,7 @@ val_loader = D.DataLoader(ds_val, batch_size=config.val_batch_size, shuffle=Fals
 tloader = D.DataLoader(ds_test, batch_size=config.val_batch_size, shuffle=False, num_workers=16)
 
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 # lr_scheduler = ExponentialLR(optimizer, gamma=0.95)
 lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
 
