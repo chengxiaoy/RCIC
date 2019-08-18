@@ -47,11 +47,11 @@ class Config():
 
     def __repr__(self):
         return "lr1_{}_lr2_{}_bs_{}_ps_{}_backbone_{}_head_{}_rgb_{}".format(self.stage1_lr,
-                                                                                          self.stage2_lr,
-                                                                                          self.train_batch_size,
-                                                                                          self.pic_size,
-                                                                                          self.backbone, self.head_type,
-                                                                                          self.use_rgb)
+                                                                             self.stage2_lr,
+                                                                             self.train_batch_size,
+                                                                             self.pic_size,
+                                                                             self.backbone, self.head_type,
+                                                                             self.use_rgb)
 
 
 class Learner:
@@ -75,7 +75,7 @@ class Learner:
         writer = SummaryWriter(logdir=os.path.join("board/", "stage1_" + self.experiment_name))
         s1_pretrained_model = train_model(model, criterion, optimizer, lr_scheduler,
                                           {'train': loader, 'val': val_loader}, writer,
-                                          self.config.stage1_epoch, "stage1_" + self.experiment_name)
+                                          self.config.stage1_epoch, "stage1_" + self.experiment_name, self.config)
 
         return s1_pretrained_model
 
@@ -85,7 +85,6 @@ class Learner:
         ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False)
         loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16)
         val_loader = D.DataLoader(ds_val, batch_size=self.config.val_batch_size, shuffle=False, num_workers=16)
-        tloader = D.DataLoader(ds_test, batch_size=self.config.val_batch_size, shuffle=False, num_workers=16)
 
         criterion = nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(s1_pretrained_model.parameters(), lr=self.config.stage2_lr)
@@ -94,7 +93,7 @@ class Learner:
         writer = SummaryWriter(logdir=os.path.join("board/", "stage2_" + self.experiment_name))
         s2_model = train_model_s2(s1_pretrained_model, criterion, optimizer, lr_scheduler,
                                   {'train': loader, 'val': val_loader}, writer,
-                                  self.config.stage1_epoch, "stage2_" + self.experiment_name)
+                                  self.config.stage1_epoch, "stage2_" + self.experiment_name, self.config)
 
         return s2_model
 
@@ -166,7 +165,7 @@ class Learner:
 
         submission = pd.read_csv('data/test.csv')
         submission['sirna'] = true_idx.astype(int)
-        submission.to_csv('submission.csv', index=False, columns=['id_code', 'sirna'])
+        submission.to_csv('submission_angle.csv', index=False, columns=['id_code', 'sirna'])
 
     def confi_evaluate(self, model):
 
@@ -357,3 +356,13 @@ def board_val(writer, accuracy, best_threshold, roc_curve_tensor, step):
     writer.add_scalar('val/accuracy', accuracy, step)
     writer.add_scalar('best_threshold', best_threshold, step)
     writer.add_image('roc_curve', roc_curve_tensor, step)
+
+
+if __name__ == "__main__":
+    config = Config()
+
+    learner = Learner(config)
+    s1_model = learner.stage_one()
+    learner.confi_evaluate(s1_model)
+    s2_model = learner.stage_two(s1_model)
+    learner.angle_evaluate(s2_model)
