@@ -65,7 +65,7 @@ class Learner:
         model = torch.nn.DataParallel(model, device_ids=self.config.device_ids)
         if weight_path is not None:
             model.load_state_dict(
-                torch.load('models/Model_False_24_512_densenet201_Aug07_13-01_35_val_acc=0.526287.pth'))
+                torch.load(weight_path))
         return model
 
     def stage_one(self):
