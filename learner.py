@@ -339,13 +339,13 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
                         embedding = model(input, target)
                         embeddings.append(embedding)
                         labels.append(target)
-                        loss = criterion(embedding, target)
-                        running_loss = running_loss + loss.item()
-                epoch_loss = running_loss / len(dataloaders[phase])
-                writer.add_scalar('val/loss', epoch_loss, epoch)
-                writer.add_text('Text', '{} Loss: {:.4f} '.format(phase, epoch_loss),
-                                epoch)
-                print('{} Loss: {:.4f} '.format(phase, epoch_loss))
+                        # loss = criterion(embedding, target)
+                        # running_loss = running_loss + loss.item()
+                # epoch_loss = running_loss / len(dataloaders[phase])
+                # writer.add_scalar('val/loss', epoch_loss, epoch)
+                # writer.add_text('Text', '{} Loss: {:.4f} '.format(phase, epoch_loss),
+                #                 epoch)
+                # print('{} Loss: {:.4f} '.format(phase, epoch_loss))
                 embeddings = torch.cat(embeddings)
                 labels = torch.cat(labels)
                 accuracy, best_threshold, roc_curve_tensor = facade(embeddings, labels)
@@ -358,6 +358,7 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
                     max_acc = accuracy
                     torch.save(model.state_dict(), 'models/' + name + ".pth")
                     best_model_wts = copy.deepcopy(model.state_dict())
+                scheduler.step(accuracy)
 
     model.load_state_dict(best_model_wts)
     return model
