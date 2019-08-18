@@ -82,7 +82,7 @@ class Learner:
     def stage_two(self, s1_pretrained_model):
         s1_pretrained_model.set_head_type('arcface')
 
-        ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False)
+        ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=True)
         loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16)
         val_loader = D.DataLoader(ds_val, batch_size=self.config.val_batch_size, shuffle=False, num_workers=16)
 
