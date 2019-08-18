@@ -29,20 +29,22 @@ class My_Model(Module):
 
         self.head_type = head_type
 
-        if head_type == 'line':
-            self.head = nn.Linear(self.num_ftrs, classes)
-        elif head_type == 'arcface':
-            self.head = Arcface(embedding_size=self.num_ftrs, classnum=classes)
+        self.line = nn.Linear(self.num_ftrs, classes)
+        self.arcface = Arcface(embedding_size=self.num_ftrs, classnum=classes)
+
+    def set_head_type(self, head_type):
+        self.head_type = head_type
 
     def forward(self, input, labels):
         output = self.backbone(input)
+
+        if self.head_type == 'line':
+            return self.line(output)
         if self.head_type == 'arcface':
             output = l2_norm(output)
             if self.training:
-                output = self.head(output, labels)
+                output = self.arcface(output, labels)
             return output
-        output = self.head(output)
-        return output
 
     def __repr__(self):
         return self.__class__.__name__
@@ -61,8 +63,8 @@ def get_backbone(model_name, use_rgb, classes=1108, pretrained=True):
         model = models.resnet101(pretrained=pretrained)
     elif model_name == 'densenet201':
         model = models.densenet201(pretrained=pretrained)
-    elif model_name == 'densenet169':
-        model = models.densenet169(pretrained=pretrained)
+    elif model_name == 'densenet121':
+        model = models.densenet121(pretrained=pretrained)
     else:
         model = None
 

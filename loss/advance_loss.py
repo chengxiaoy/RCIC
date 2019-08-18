@@ -7,6 +7,7 @@ import math
 import pdb
 from torch import nn
 from torch.autograd import Variable
+
 device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
 
