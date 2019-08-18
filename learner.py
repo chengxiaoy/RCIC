@@ -87,18 +87,22 @@ class Learner:
         return s1_pretrained_model
 
     def stage_two(self, s1_pretrained_model):
-        s1_pretrained_model.set_head_type('arcface')
+
+        model = s1_pretrained_model.module
+
+        model.set_head_type('arcface')
+        model = torch.nn.DataParallel(model, device_ids=self.config.device_ids)
 
         ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=True)
         loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16)
         val_loader = D.DataLoader(ds_val, batch_size=self.config.val_batch_size, shuffle=False, num_workers=16)
 
         criterion = nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(s1_pretrained_model.parameters(), lr=self.config.stage2_lr)
+        optimizer = torch.optim.Adam(model.parameters(), lr=self.config.stage2_lr)
         lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
 
         writer = SummaryWriter(logdir=os.path.join("board/", "stage2_" + self.experiment_name))
-        s2_model = train_model_s2(s1_pretrained_model, criterion, optimizer, lr_scheduler,
+        s2_model = train_model_s2(model, criterion, optimizer, lr_scheduler,
                                   {'train': loader, 'val': val_loader}, writer,
                                   self.config.stage1_epoch, "stage2_" + self.experiment_name, self.config)
 
@@ -373,5 +377,6 @@ if __name__ == "__main__":
     # learner.confi_evaluate(s1_model)
     s1_model = learner.build_model(
         weight_path='stage1_Aug18_06-44_lr1_0.0001_lr2_0.0001_bs_32_ps_384_backbone_densenet121_head_arcface_rgb_False.pth')
+
     s2_model = learner.stage_two(s1_model)
     learner.angle_evaluate(s2_model)
