@@ -59,10 +59,17 @@ class Learner:
         self.config = config
         self.experiment_name = datetime.now().strftime('%b%d_%H-%M') + "_" + str(config)
 
-    def stage_one(self):
+    def build_model(self, weight_path=None):
         model = get_model(self.config.backbone, self.config.use_rgb, 'line')
         model = model.to(device)
         model = torch.nn.DataParallel(model, device_ids=self.config.device_ids)
+        if weight_path is not None:
+            model.load_state_dict(
+                torch.load('models/Model_False_24_512_densenet201_Aug07_13-01_35_val_acc=0.526287.pth'))
+        return model
+
+    def stage_one(self):
+        model = self.build_model()
 
         ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False)
         loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16)
@@ -257,7 +264,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
             if phase == 'val' and epoch_acc[phase] > max_acc:
                 max_acc = epoch_acc[phase]
                 best_model_wts = copy.deepcopy(model.state_dict())
-                torch.save(model.state_dict(), name + ".pth")
+                torch.save(model.state_dict(), "models/" + name + ".pth")
 
         writer.add_scalars('data/loss', {'train': epoch_loss['train'], 'val': epoch_loss['val']}, epoch)
         writer.add_scalars('data/acc', {'train': epoch_acc['train'], 'val': epoch_acc['val']}, epoch)
@@ -362,7 +369,9 @@ if __name__ == "__main__":
     config = Config()
 
     learner = Learner(config)
-    s1_model = learner.stage_one()
-    learner.confi_evaluate(s1_model)
+    # s1_model = learner.stage_one()
+    # learner.confi_evaluate(s1_model)
+    s1_model = learner.build_model(
+        weight_path='stage1_Aug18_06-44_lr1_0.0001_lr2_0.0001_bs_32_ps_384_backbone_densenet121_head_arcface_rgb_False.pth')
     s2_model = learner.stage_two(s1_model)
     learner.angle_evaluate(s2_model)
