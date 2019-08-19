@@ -41,10 +41,10 @@ class My_Model(Module):
             Dropout(0.3),
             Flatten(),
             Linear(1024, 512),
-            BatchNorm1d(embedding_size))
+            BatchNorm1d(512))
 
-        self.line = nn.Linear(embedding_size, classes)
-        self.arcface = Arcface(embedding_size=embedding_size, classnum=classes)
+        self.line = nn.Linear(512, classes)
+        self.arcface = Arcface(embedding_size=512, classnum=classes)
 
     def set_head_type(self, head_type):
         self.head_type = head_type
