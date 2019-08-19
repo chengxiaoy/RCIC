@@ -43,7 +43,7 @@ class My_Model(Module):
             Linear(1024, 512),
             BatchNorm1d(512))
 
-        self.line = nn.Linear(512, classes)
+        self.line = nn.Linear(self.num_ftrs, classes)
         self.arcface = Arcface(embedding_size=512, classnum=classes)
 
     def set_head_type(self, head_type):
