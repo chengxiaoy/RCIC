@@ -242,22 +242,21 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
                 target = target.to(device)
                 optimizer.zero_grad()
                 with torch.set_grad_enabled(phase == 'train'):
-                    with torch.autograd.set_detect_anomaly(True):
-                        theta = model(input, target)
-                        loss = criterion(theta, target)
+                    theta = model(input, target)
+                    loss = criterion(theta, target)
 
-                        if phase == 'train':
-                            loss.backward()
-                            optimizer.step()
-                        running_loss = running_loss + loss.item()
-                        label = torch.max(theta.data, 1)[1]
-                        for i, j in zip(label, target.data.cpu().numpy()):
-                            if len(label.shape) == 1:
-                                if i == j:
-                                    running_corrects += 1
-                            else:
-                                if i[0] == j[0]:
-                                    running_corrects += 1
+                    if phase == 'train':
+                        loss.backward()
+                        optimizer.step()
+                    running_loss = running_loss + loss.item()
+                    label = torch.max(theta.data, 1)[1]
+                    for i, j in zip(label, target.data.cpu().numpy()):
+                        if len(label.shape) == 1:
+                            if i == j:
+                                running_corrects += 1
+                        else:
+                            if i[0] == j[0]:
+                                running_corrects += 1
             epoch_loss[phase] = running_loss / len(dataloaders[phase])
             epoch_acc[phase] = running_corrects / (len(dataloaders[phase]) * config.train_batch_size)
 
@@ -379,5 +378,7 @@ if __name__ == "__main__":
     s1_model = learner.build_model(
         weight_path='stage1_Aug18_06-44_lr1_0.0001_lr2_0.0001_bs_32_ps_384_backbone_densenet121_head_arcface_rgb_False.pth')
 
-    s2_model = learner.stage_two(s1_model)
-    learner.angle_evaluate(s2_model)
+    learner.confi_evaluate(s1_model)
+
+    # s2_model = learner.stage_two(s1_model)
+    # learner.angle_evaluate(s2_model)
