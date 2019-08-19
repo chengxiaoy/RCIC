@@ -35,7 +35,7 @@ class My_Model(Module):
             backbone.classifier = Identity()
 
         self.head_type = head_type
-        print(type(self.num_ftrs))
+        print(type(embedding_size))
         self.output_layer = Sequential(
             # BatchNorm2d(512),
             Dropout(0.3),
