@@ -35,12 +35,12 @@ class My_Model(Module):
             backbone.classifier = Identity()
 
         self.head_type = head_type
-        print(self.num_ftrs)
+        print(type(self.num_ftrs))
         self.output_layer = Sequential(
             # BatchNorm2d(512),
             Dropout(0.3),
             Flatten(),
-            Linear(self.num_ftrs, embedding_size),
+            Linear(int(self.num_ftrs), embedding_size),
             BatchNorm1d(embedding_size))
 
         self.line = nn.Linear(embedding_size, classes)
