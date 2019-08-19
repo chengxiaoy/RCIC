@@ -40,7 +40,7 @@ class My_Model(Module):
             # BatchNorm2d(512),
             Dropout(0.3),
             Flatten(),
-            Linear(int(self.num_ftrs), embedding_size),
+            Linear(1024, 512),
             BatchNorm1d(embedding_size))
 
         self.line = nn.Linear(embedding_size, classes)
