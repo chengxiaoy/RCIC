@@ -25,14 +25,14 @@ from tensorboardX import SummaryWriter
 from datetime import datetime
 from evaluate import facade
 
-device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class Config():
     train_batch_size = 32
     val_batch_size = 32
 
-    device_ids = [2, 3]
+    device_ids = [0, 1]
     use_rgb = False
     backbone = 'resnet_50'
     head_type = 'arcface'
@@ -69,7 +69,7 @@ class Learner:
         return model
 
     def stage_one(self):
-        model = self.build_model()
+        model = self.build_model(weight_path='models/stage1_Aug19_10-08_lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
 
         ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False)
         loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16)
