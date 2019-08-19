@@ -39,8 +39,8 @@ class Config():
     classes = 1108
     pic_size = 384
 
-    stage1_epoch = 30
-    stage2_epoch = 30
+    stage1_epoch = 20
+    stage2_epoch = 20
 
     stage1_lr = 0.0001
     stage2_lr = 0.0001
@@ -190,7 +190,7 @@ class Learner:
         with torch.no_grad():
             for x, _ in tqdm(tloader):
                 x = x.to(device)
-                output = model(x,_)
+                output = model(x, _)
                 idx = output.max(dim=-1)[1].cpu().numpy()
                 confidence = output.max(dim=-1)[0].cpu().numpy()
                 preds = np.append(preds, idx, axis=0)
@@ -373,12 +373,12 @@ if __name__ == "__main__":
     config = Config()
 
     learner = Learner(config)
-    # s1_model = learner.stage_one()
-    # learner.confi_evaluate(s1_model)
-    s1_model = learner.build_model(
-        weight_path='stage1_Aug18_06-44_lr1_0.0001_lr2_0.0001_bs_32_ps_384_backbone_densenet121_head_arcface_rgb_False.pth')
+    s1_model = learner.stage_one()
+    learner.confi_evaluate(s1_model)
+    # s1_model = learner.build_model(
+    #     weight_path='stage1_Aug18_06-44_lr1_0.0001_lr2_0.0001_bs_32_ps_384_backbone_densenet121_head_arcface_rgb_False.pth')
 
     learner.confi_evaluate(s1_model)
 
-    # s2_model = learner.stage_two(s1_model)
-    # learner.angle_evaluate(s2_model)
+    s2_model = learner.stage_two(s1_model)
+    learner.angle_evaluate(s2_model)
