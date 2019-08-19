@@ -25,6 +25,8 @@ class My_Model(Module):
 
     def __init__(self, backbone, model_name, classes, embedding_size=512, head_type='line'):
         super(My_Model, self).__init__()
+
+        self.pre_process = nn.BatchNorm2d(6)
         self.backbone = backbone
 
         if model_name.startswith('resnet'):
@@ -39,16 +41,18 @@ class My_Model(Module):
             # BatchNorm2d(512),
             Dropout(0.3),
             Flatten(),
-            Linear(1024, 512),
-            BatchNorm1d(512))
+            Linear(self.num_ftrs, int(embedding_size)),
+            BatchNorm1d(int(embedding_size)))
 
         self.line = nn.Linear(self.num_ftrs, classes)
-        self.arcface = Arcface(embedding_size=512, classnum=classes)
+        self.arcface = Arcface(embedding_size=int(embedding_size), classnum=classes)
 
     def set_head_type(self, head_type):
         self.head_type = head_type
 
     def forward(self, input, labels):
+        # bn 6 channels
+        input = self.pre_process(input)
         output = self.backbone(input)
 
         if self.head_type == 'line':

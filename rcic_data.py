@@ -15,6 +15,7 @@ import os
 import sys
 from collections import defaultdict
 from random import sample, choice
+from loss import trick
 
 rgb_train_csv_path = 'new_train.csv'
 rgb_test_csv_path = 'new_test.csv'
@@ -59,7 +60,8 @@ def get_dataset(rgb=True, size=512, pair=False):
         df_test = pd.read_csv(rgb_test_csv_path)
 
         # build same pair for metric in val phase
-        df_val = val_pair(df_val)
+        if pair:
+            df_val = val_pair(df_val)
 
         ds = ImagesDS(df_train, 'train', True, mode='train', augmentation=True, size=size)
         ds_val = ImagesDS(df_val, 'train', True, mode='train', size=size)
@@ -70,8 +72,9 @@ def get_dataset(rgb=True, size=512, pair=False):
         rgb_df = pd.read_csv(train_csv_path)
         df_train, df_val = train_test_split(rgb_df, test_size=0.12, stratify=rgb_df.sirna, random_state=42)
         df_test = pd.read_csv(test_csv_path)
-        # build same pair for metric in val phase
-        df_val = val_pair(df_val)
+        if pair:
+            # build same pair for metric in val phase
+            df_val = val_pair(df_val)
 
         ds = ImagesDS(df_train, img_dir, False, mode='train', augmentation=True, size=size)
         ds_val = ImagesDS(df_val, img_dir, False, mode='train', size=size)
@@ -95,11 +98,21 @@ class ImagesDS(D.Dataset):
         self.rgb = rgb
         self.size = size
 
-    @staticmethod
-    def _load_img_as_tensor(file_name, size):
+    def _load_img_as_tensor(self, file_name, size):
         with Image.open(file_name) as img:
             img = T.Resize(size)(img)
-            return T.ToTensor()(img)
+
+            if not self.augmentation:
+                return T.ToTensor()(img)
+            else:
+                transfrom = T.Compose([
+                    T.RandomRotation(90),
+                    T.RandomHorizontalFlip(0.5),
+                    T.RandomVerticalFlip(0.5),
+                    trick.RandomErasing(),
+                    T.ToTensor()
+                ])
+                return transfrom(img)
 
     def _get_img_path(self, index, channel, site):
         experiment, well, plate = self.records[index].experiment, self.records[index].well, self.records[index].plate
