@@ -34,13 +34,13 @@ class Config():
 
     device_ids = [2, 3]
     use_rgb = False
-    backbone = 'densenet121'
+    backbone = 'resnet_50'
     head_type = 'arcface'
     classes = 1108
     pic_size = 448
 
-    stage1_epoch = 20
-    stage2_epoch = 20
+    stage1_epoch = 30
+    stage2_epoch = 30
 
     stage1_lr = 0.0001
     stage2_lr = 0.0001
@@ -77,6 +77,7 @@ class Learner:
 
         criterion = nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=self.config.stage1_lr)
+
         lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
 
         writer = SummaryWriter(logdir=os.path.join("board/", "stage1_" + self.experiment_name))
@@ -221,6 +222,9 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
 
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
         print('-' * 10)
+
+        lr = float(optimizer.param_groups[0]['lr'])
+        print("Learning rate: {}".format(lr))
 
         epoch_loss = {}
         epoch_acc = {}

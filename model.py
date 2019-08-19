@@ -51,11 +51,11 @@ class My_Model(Module):
 
     def forward(self, input, labels):
         output = self.backbone(input)
-        output = self.output_layer(output)
 
         if self.head_type == 'line':
             return self.line(output)
         if self.head_type == 'arcface':
+            output = self.output_layer(output)
             output = l2_norm(output)
             if self.training:
                 output = self.arcface(output, labels)
@@ -74,6 +74,8 @@ def get_model(model_name, use_rgb, head_type, classes=1108, pretrained=True):
 def get_backbone(model_name, use_rgb, classes=1108, pretrained=True):
     if model_name == 'resnet_18':
         model = models.resnet18(pretrained=pretrained)
+    elif model_name == 'resnet_50':
+        model = models.resnet50(pretrained=pretrained)
     elif model_name == 'resnet_101':
         model = models.resnet101(pretrained=pretrained)
     elif model_name == 'densenet201':
