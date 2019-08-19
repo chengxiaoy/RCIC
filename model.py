@@ -2,8 +2,15 @@ from torchvision import models
 from torch import nn
 import torch
 from torch.nn import Module
+from torch.nn import Linear, Conv2d, BatchNorm1d, BatchNorm2d, PReLU, ReLU, Sigmoid, Dropout2d, Dropout, AvgPool2d, \
+    MaxPool2d, AdaptiveAvgPool2d, Sequential, Module, Parameter
 
 from loss.advance_loss import Arcface, l2_norm, CusAngleLinear, CusAngleLoss
+
+
+class Flatten(Module):
+    def forward(self, input):
+        return input.view(input.size(0), -1)
 
 
 class Identity(nn.Module):
@@ -16,7 +23,7 @@ class Identity(nn.Module):
 
 class My_Model(Module):
 
-    def __init__(self, backbone, model_name, classes, head_type='line'):
+    def __init__(self, backbone, model_name, classes, embedding_size=512, head_type='line'):
         super(My_Model, self).__init__()
         self.backbone = backbone
 
@@ -29,14 +36,22 @@ class My_Model(Module):
 
         self.head_type = head_type
 
-        self.line = nn.Linear(self.num_ftrs, classes)
-        self.arcface = Arcface(embedding_size=self.num_ftrs, classnum=classes)
+        self.output_layer = Sequential(
+            # BatchNorm2d(512),
+            Dropout(0.3),
+            Flatten(),
+            Linear(self.num_ftrs, embedding_size),
+            BatchNorm1d(embedding_size))
+
+        self.line = nn.Linear(embedding_size, classes)
+        self.arcface = Arcface(embedding_size=embedding_size, classnum=classes)
 
     def set_head_type(self, head_type):
         self.head_type = head_type
 
     def forward(self, input, labels):
         output = self.backbone(input)
+        output = self.output_layer(output)
 
         if self.head_type == 'line':
             return self.line(output)
