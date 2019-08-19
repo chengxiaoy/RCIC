@@ -44,6 +44,8 @@ class My_Model(Module):
             Linear(self.num_ftrs, int(embedding_size)),
             BatchNorm1d(int(embedding_size)))
 
+        self.dropout = nn.Dropout(0.2)
+
         self.line = nn.Linear(self.num_ftrs, classes)
         self.arcface = Arcface(embedding_size=int(embedding_size), classnum=classes)
 
@@ -56,6 +58,7 @@ class My_Model(Module):
         output = self.backbone(input)
 
         if self.head_type == 'line':
+            output = self.dropout(output)
             return self.line(output)
         if self.head_type == 'arcface':
             output = self.output_layer(output)
