@@ -190,7 +190,7 @@ class Learner:
         with torch.no_grad():
             for x, _ in tqdm(tloader):
                 x = x.to(device)
-                output = model(x)
+                output = model(x,_)
                 idx = output.max(dim=-1)[1].cpu().numpy()
                 confidence = output.max(dim=-1)[0].cpu().numpy()
                 preds = np.append(preds, idx, axis=0)
