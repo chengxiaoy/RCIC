@@ -23,7 +23,7 @@ class Identity(nn.Module):
 
 class My_Model(Module):
 
-    def __init__(self, backbone, model_name, classes, embedding_size=512, head_type='line'):
+    def __init__(self, backbone, model_name, classes,  head_type='line',embedding_size=512):
         super(My_Model, self).__init__()
 
         self.pre_process = nn.BatchNorm2d(6)
