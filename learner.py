@@ -37,7 +37,7 @@ class Config():
     backbone = 'densenet121'
     head_type = 'arcface'
     classes = 1108
-    pic_size = 384
+    pic_size = 448
 
     stage1_epoch = 20
     stage2_epoch = 20
