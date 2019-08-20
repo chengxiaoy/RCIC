@@ -42,7 +42,7 @@ class Config():
     stage1_epoch = 30
     stage2_epoch = 30
 
-    stage1_lr = 0.00001
+    stage1_lr = 0.0001
     stage2_lr = 0.0001
 
     def __repr__(self):
@@ -69,14 +69,14 @@ class Learner:
         return model
 
     def stage_one(self):
-        model = self.build_model(
-            weight_path='models/stage1_Aug19_16-21_lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
+        model = self.build_model()
 
         ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False)
         loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16)
         val_loader = D.DataLoader(ds_val, batch_size=self.config.val_batch_size, shuffle=False, num_workers=16)
 
-        criterion = nn.CrossEntropyLoss()
+        # criterion = nn.CrossEntropyLoss()
+        criterion = trick.LabelSmoothing(1108, 0.1)
         optimizer = torch.optim.Adam(model.parameters(), lr=self.config.stage1_lr)
 
         lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)

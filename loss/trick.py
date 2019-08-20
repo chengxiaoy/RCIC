@@ -20,6 +20,7 @@ class LabelSmoothing(nn.Module):
         self.smoothing = smoothing
         self.size = size
         self.true_dist = None
+        self.log_softmax = nn.LogSoftmax(1)
 
     def forward(self, x, target):
         """
@@ -28,6 +29,7 @@ class LabelSmoothing(nn.Module):
         """
 
         assert x.size(1) == self.size
+        x = self.log_softmax(x)
         true_dist = x.data.clone()  # 先深复制过来
         true_dist.fill_(self.smoothing / (self.size - 1))  # otherwise的公式
         # print true_dist
