@@ -42,7 +42,7 @@ class Config():
     stage1_epoch = 30
     stage2_epoch = 30
 
-    stage1_lr = 0.0001
+    stage1_lr = 0.00001
     stage2_lr = 0.0001
 
     def __repr__(self):
