@@ -25,14 +25,14 @@ from tensorboardX import SummaryWriter
 from datetime import datetime
 from evaluate import facade
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
 
 class Config():
     train_batch_size = 32
     val_batch_size = 32
 
-    device_ids = [0, 1]
+    device_ids = [2, 3]
     use_rgb = False
     backbone = 'resnet_50'
     head_type = 'arcface'
@@ -42,7 +42,7 @@ class Config():
     stage1_epoch = 30
     stage2_epoch = 30
 
-    stage1_lr = 0.00001
+    stage1_lr = 0.0001
     stage2_lr = 0.0001
 
     def __repr__(self):
@@ -378,12 +378,12 @@ if __name__ == "__main__":
     config = Config()
 
     learner = Learner(config)
-    # s1_model = learner.stage_one()
-    # learner.confi_evaluate(s1_model)
-    s1_model = learner.build_model(
-        weight_path='models/stage1_Aug20_02-18_lr1_1e-05_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
-
+    s1_model = learner.stage_one()
     learner.confi_evaluate(s1_model)
+    # s1_model = learner.build_model(
+    #     weight_path='models/stage1_Aug20_02-18_lr1_1e-05_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
+    #
+    # learner.confi_evaluate(s1_model)
 
     # s2_model = learner.stage_two(s1_model)
     # learner.angle_evaluate(s2_model)
