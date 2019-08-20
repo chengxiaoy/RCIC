@@ -69,7 +69,8 @@ class Learner:
         return model
 
     def stage_one(self):
-        model = self.build_model()
+        model = self.build_model(
+            weight_path='models/stage1_Aug19_16-21_lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
 
         ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False)
         loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16)
@@ -380,9 +381,9 @@ if __name__ == "__main__":
     s1_model = learner.stage_one()
     learner.confi_evaluate(s1_model)
     # s1_model = learner.build_model(
-    #     weight_path='stage1_Aug18_06-44_lr1_0.0001_lr2_0.0001_bs_32_ps_384_backbone_densenet121_head_arcface_rgb_False.pth')
+    #     weight_path='models/stage1_Aug20_02-18_lr1_1e-05_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
+    #
+    # learner.confi_evaluate(s1_model)
 
-    learner.confi_evaluate(s1_model)
-
-    s2_model = learner.stage_two(s1_model)
-    learner.angle_evaluate(s2_model)
+    # s2_model = learner.stage_two(s1_model)
+    # learner.angle_evaluate(s2_model)
