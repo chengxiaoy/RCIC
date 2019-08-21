@@ -106,7 +106,7 @@ class ImagesDS(D.Dataset):
                 trans = T.Compose([
                     T.FiveCrop(256),
                     T.Lambda(lambda crops: torch.stack([T.ToTensor()(crop) for crop in crops])),
-                    T.ToTensor()
+
                 ])
                 return trans(img)
             else:
