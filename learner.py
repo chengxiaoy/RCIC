@@ -230,7 +230,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
         epoch_loss = {}
         epoch_acc = {}
         # Each epoch has a training and validation phase
-        for phase in ['train', 'val']:
+        for phase in ['val', 'train']:
             if phase == 'train':
                 # scheduler.step()
                 model.train()  # Set model to training mode
