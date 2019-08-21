@@ -75,8 +75,8 @@ class Learner:
         loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16)
         val_loader = D.DataLoader(ds_val, batch_size=self.config.val_batch_size, shuffle=False, num_workers=16)
 
-        # criterion = nn.CrossEntropyLoss()
-        criterion = trick.LabelSmoothing(1108, 0.1)
+        criterion = nn.CrossEntropyLoss()
+        # criterion = trick.LabelSmoothing(1108, 0.1)
         optimizer = torch.optim.Adam(model.parameters(), lr=self.config.stage1_lr)
 
         lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
