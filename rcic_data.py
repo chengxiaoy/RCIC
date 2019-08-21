@@ -103,7 +103,7 @@ class ImagesDS(D.Dataset):
             img = T.Resize(size)(img)
 
             if not self.augmentation:
-                trans = transforms.Compose([
+                trans = T.Compose([
                     T.FiveCrop(256),
                     T.Lambda(lambda crops: torch.stack([transforms.ToTensor()(crop) for crop in crops])),
                     T.ToTensor()
