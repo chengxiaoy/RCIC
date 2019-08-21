@@ -166,7 +166,7 @@ class ImagesDS(D.Dataset):
             # else:
             #     img = torch.load(tensor_path)
             paths = [self._get_img_path(index, ch, site) for ch in self.channels]
-            img = torch.cat([self._load_img_as_tensor(img_path, self.size) for img_path in paths])
+            img = torch.cat([self._load_img_as_tensor(img_path, self.size) for img_path in paths], dim=1)
 
             if self.mode == 'train':
                 return img, int(self.records[index].sirna)
