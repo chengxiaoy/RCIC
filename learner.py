@@ -29,7 +29,7 @@ device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
 
 class Config():
-    train_batch_size = 32
+    train_batch_size = 128
     val_batch_size = 24
 
     device_ids = [2, 3]
@@ -230,7 +230,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
         epoch_loss = {}
         epoch_acc = {}
         # Each epoch has a training and validation phase
-        for phase in ['val', 'train']:
+        for phase in [ 'train','val']:
             if phase == 'train':
                 # scheduler.step()
                 model.train()  # Set model to training mode
