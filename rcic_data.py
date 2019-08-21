@@ -103,9 +103,16 @@ class ImagesDS(D.Dataset):
             img = T.Resize(size)(img)
 
             if not self.augmentation:
-                return T.ToTensor()(img)
+                trans = transforms.Compose([
+                    T.FiveCrop(256),
+                    T.Lambda(lambda crops: torch.stack([transforms.ToTensor()(crop) for crop in crops])),
+                    T.ToTensor()
+                ])
+                return trans(img)
             else:
                 transfrom = T.Compose([
+                    T.FiveCrop(256),
+                    T.Lambda(lambd=lambda crops: crops[random.randint(0, 4)]),
                     T.RandomRotation(90),
                     T.RandomHorizontalFlip(0.5),
                     T.RandomVerticalFlip(0.5),

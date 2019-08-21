@@ -242,26 +242,49 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
             running_corrects = 0
 
             for i, (input, target) in enumerate(dataloaders[phase]):
+                if phase == 'train':
+                    input = input.to(device)
+                    target = target.to(device)
+                    optimizer.zero_grad()
+                    with torch.set_grad_enabled(phase == 'train'):
+                        theta = model(input, target)
+                        loss = criterion(theta, target)
 
-                input = input.to(device)
-                target = target.to(device)
-                optimizer.zero_grad()
-                with torch.set_grad_enabled(phase == 'train'):
-                    theta = model(input, target)
-                    loss = criterion(theta, target)
+                        if phase == 'train':
+                            loss.backward()
+                            optimizer.step()
+                        running_loss = running_loss + loss.item()
+                        label = torch.max(theta.data, 1)[1]
+                        for i, j in zip(label, target.data.cpu().numpy()):
+                            if len(label.shape) == 1:
+                                if i == j:
+                                    running_corrects += 1
+                            else:
+                                if i[0] == j[0]:
+                                    running_corrects += 1
+                else:
+                    input = input.to(device)
+                    target = target.to(device)
+                    optimizer.zero_grad()
+                    bs, ncrops, c, h, w = input.size()
+                    result = model(input.view(-1, c, h, w), target)  # fuse batch size and ncrops
+                    result_avg = result.view(bs, ncrops, -1).mean(1)  # avg over crops
 
-                    if phase == 'train':
-                        loss.backward()
-                        optimizer.step()
-                    running_loss = running_loss + loss.item()
-                    label = torch.max(theta.data, 1)[1]
-                    for i, j in zip(label, target.data.cpu().numpy()):
-                        if len(label.shape) == 1:
-                            if i == j:
-                                running_corrects += 1
-                        else:
-                            if i[0] == j[0]:
-                                running_corrects += 1
+                    with torch.set_grad_enabled(phase == 'train'):
+                        loss = criterion(result_avg, target)
+                        if phase == 'train':
+                            loss.backward()
+                            optimizer.step()
+                        running_loss = running_loss + loss.item()
+                        label = torch.max(result_avg.data, 1)[1]
+                        for i, j in zip(label, target.data.cpu().numpy()):
+                            if len(label.shape) == 1:
+                                if i == j:
+                                    running_corrects += 1
+                            else:
+                                if i[0] == j[0]:
+                                    running_corrects += 1
+
             epoch_loss[phase] = running_loss / len(dataloaders[phase])
             epoch_acc[phase] = running_corrects / (len(dataloaders[phase]) * config.train_batch_size)
 
