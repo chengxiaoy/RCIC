@@ -105,7 +105,7 @@ class ImagesDS(D.Dataset):
             if not self.augmentation:
                 trans = T.Compose([
                     T.FiveCrop(256),
-                    T.Lambda(lambda crops: torch.stack([transforms.ToTensor()(crop) for crop in crops])),
+                    T.Lambda(lambda crops: torch.stack([T.ToTensor()(crop) for crop in crops])),
                     T.ToTensor()
                 ])
                 return trans(img)
