@@ -29,9 +29,9 @@ device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
 
 class Config():
-    train_batch_size = 128
-    val_batch_size = 128
-    test_batch_size = 128
+    train_batch_size = 32
+    val_batch_size = 32
+    test_batch_size = 32
 
     device_ids = [2, 3]
     use_rgb = False
@@ -43,7 +43,7 @@ class Config():
     stage1_epoch = 100
     stage2_epoch = 30
 
-    stage1_lr = 0.0001
+    stage1_lr = 0.00003
     stage2_lr = 0.0001
 
     def __repr__(self):
