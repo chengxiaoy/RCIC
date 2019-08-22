@@ -31,6 +31,7 @@ device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 class Config():
     train_batch_size = 128
     val_batch_size = 128
+    test_batch_size = 128
 
     device_ids = [2, 3]
     use_rgb = False
@@ -185,18 +186,34 @@ class Learner:
         model.eval()
         ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False)
 
-        tloader = D.DataLoader(ds_test, batch_size=self.config.val_batch_size, shuffle=False, num_workers=16)
+        tloader = D.DataLoader(ds_test, batch_size=self.config.test_batch_size, shuffle=False, num_workers=16)
 
         preds = np.empty(0)
         confi = np.empty(0)
         with torch.no_grad():
             for x, _ in tqdm(tloader):
                 x = x.to(device)
-                output = model(x, _)
-                idx = output.max(dim=-1)[1].cpu().numpy()
-                confidence = output.max(dim=-1)[0].cpu().numpy()
-                preds = np.append(preds, idx, axis=0)
-                confi = np.append(confi, confidence, axis=0)
+                if len(x.size()) == 5:
+                    bs, ncrops, c, h, w = x.size()
+                    output = model(x.view(-1, c, h, w), _)  # fuse batch size and ncrops
+                    output_avg = output.view(bs, ncrops, -1).mean(1)  # avg over crops
+                    idx = output.max(dim=-1)[1].cpu().numpy()
+                    confidence = output.max(dim=-1)[0].cpu().numpy()
+
+                    idx = idx.rehape(-1, 5)
+                    confidence = confidence.reshape(-1, 5)
+                    confi_max_idx = confidence.argmax(axis=1)
+                    confi_max = confidence.max(axis=1)
+                    idx_max = idx[range(len(idx)), confi_max_idx]
+                    print(idx_max)
+                    preds = np.append(preds, idx_max, axis=0)
+                    confi = np.append(confi, confi_max, axis=0)
+                else:
+                    output = model(x, _)
+                    idx = output.max(dim=-1)[1].cpu().numpy()
+                    confidence = output.max(dim=-1)[0].cpu().numpy()
+                    preds = np.append(preds, idx, axis=0)
+                    confi = np.append(confi, confidence, axis=0)
 
         joblib.dump([confi, preds], "res.pkl")
 
@@ -230,7 +247,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
         epoch_loss = {}
         epoch_acc = {}
         # Each epoch has a training and validation phase
-        for phase in [ 'train','val']:
+        for phase in ['train', 'val']:
             if phase == 'train':
                 # scheduler.step()
                 model.train()  # Set model to training mode
@@ -401,12 +418,12 @@ if __name__ == "__main__":
     config = Config()
 
     learner = Learner(config)
-    s1_model = learner.stage_one()
-    learner.confi_evaluate(s1_model)
-    # s1_model = learner.build_model(
-    #     weight_path='models/stage1_Aug20_10-34_lr1_1e-05_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
-    #
+    # s1_model = learner.stage_one()
     # learner.confi_evaluate(s1_model)
+    s1_model = learner.build_model(
+        weight_path='models/stage1_Aug21_12-45_lr1_0.0001_lr2_0.0001_bs_128_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
+
+    learner.confi_evaluate(s1_model)
 
     # s2_model = learner.stage_two(s1_model)
     # learner.angle_evaluate(s2_model)
