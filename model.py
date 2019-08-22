@@ -5,7 +5,8 @@ from torch.nn import Module
 from torch.nn import Linear, Conv2d, BatchNorm1d, BatchNorm2d, PReLU, ReLU, Sigmoid, Dropout2d, Dropout, AvgPool2d, \
     MaxPool2d, AdaptiveAvgPool2d, Sequential, Module, Parameter
 
-from loss.advance_loss import Arcface, l2_norm, CusAngleLinear, CusAngleLoss
+from loss.advance_loss import Arcface, l2_norm, ArcMarginProduct
+import torch.nn.functional as F
 
 
 class Flatten(Module):
@@ -23,7 +24,7 @@ class Identity(nn.Module):
 
 class My_Model(Module):
 
-    def __init__(self, backbone, model_name, classes,  head_type='line',embedding_size=512):
+    def __init__(self, backbone, model_name, classes, head_type='line', embedding_size=512):
         super(My_Model, self).__init__()
 
         self.pre_process = nn.BatchNorm2d(6)
@@ -38,7 +39,7 @@ class My_Model(Module):
 
         self.head_type = head_type
         self.output_layer = Sequential(
-            # BatchNorm2d(512),
+            BatchNorm2d(self.num_ftrs),
             Dropout(0.3),
             Flatten(),
             Linear(self.num_ftrs, int(embedding_size)),
@@ -47,7 +48,8 @@ class My_Model(Module):
         self.dropout = nn.Dropout(0.2)
 
         self.line = nn.Linear(self.num_ftrs, classes)
-        self.arcface = Arcface(embedding_size=int(embedding_size), classnum=classes)
+        # self.arcface = Arcface(embedding_size=int(embedding_size), classnum=classes)
+        self.arcface = ArcMarginProduct(embedding_size, classes)
 
     def set_head_type(self, head_type):
         self.head_type = head_type
@@ -62,10 +64,11 @@ class My_Model(Module):
             return self.line(output)
         if self.head_type == 'arcface':
             output = self.output_layer(output)
-            output = l2_norm(output)
-            if self.training:
-                output = self.arcface(output, labels)
-            return output
+            output = F.normalize(output)
+
+            # if self.training:
+            cos = self.arcface(output, labels)
+            return output, cos
 
     def __repr__(self):
         return self.__class__.__name__

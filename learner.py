@@ -24,6 +24,7 @@ import joblib
 from tensorboardX import SummaryWriter
 from datetime import datetime
 from evaluate import facade
+from loss.advance_loss import ArcFaceLoss
 
 device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
@@ -43,7 +44,7 @@ class Config():
     stage1_epoch = 100
     stage2_epoch = 30
 
-    stage1_lr = 0.00003
+    stage1_lr = 0.0001
     stage2_lr = 0.0001
 
     def __repr__(self):
@@ -58,7 +59,8 @@ class Config():
 class Learner:
     def __init__(self, config):
         self.config = config
-        self.experiment_name = datetime.now().strftime('%b%d_%H-%M') + "_" + str(config)
+        self.experiment_name = datetime.now().strftime('%b%d_%H-%M') + "-" + str(config)
+        self.experiment_time = datetime.now().strftime('%b%d_%H-%M')
 
     def build_model(self, weight_path=None):
         model = get_model(self.config.backbone, self.config.use_rgb, 'line')
@@ -82,7 +84,7 @@ class Learner:
 
         lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
 
-        writer = SummaryWriter(logdir=os.path.join("board/", "stage1_" + self.experiment_name))
+        writer = SummaryWriter(logdir=os.path.join("board", "stage1_" + self.experiment_name))
         s1_pretrained_model = train_model(model, criterion, optimizer, lr_scheduler,
                                           {'train': loader, 'val': val_loader}, writer,
                                           self.config.stage1_epoch, "stage1_" + self.experiment_name, self.config)
@@ -100,11 +102,12 @@ class Learner:
         loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16)
         val_loader = D.DataLoader(ds_val, batch_size=self.config.val_batch_size, shuffle=False, num_workers=16)
 
-        criterion = nn.CrossEntropyLoss()
+        # criterion = nn.CrossEntropyLoss()
+        criterion = ArcFaceLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=self.config.stage2_lr)
         lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
 
-        writer = SummaryWriter(logdir=os.path.join("board/", "stage2_" + self.experiment_name))
+        writer = SummaryWriter(logdir=os.path.join("board", "stage2_" + self.experiment_name))
         s2_model = train_model_s2(model, criterion, optimizer, lr_scheduler,
                                   {'train': loader, 'val': val_loader}, writer,
                                   self.config.stage1_epoch, "stage2_" + self.experiment_name, self.config)
@@ -354,12 +357,12 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
                     target = target.to(device)
                     optimizer.zero_grad()
                     with torch.set_grad_enabled(True):
-                        embedding = model(input, target)
-                        loss = criterion(embedding, target)
+                        embedding, cos = model(input, target)
+                        loss = criterion(cos, target)
                         loss.backward()
                         optimizer.step()
                         running_loss = running_loss + loss.item()
-                        label = torch.max(embedding.data, 1)[1]
+                        label = torch.max(cos.data, 1)[1]
 
                         for i, j in zip(label, target.data.cpu().numpy()):
                             if len(label.shape) == 1:
@@ -371,11 +374,13 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
 
                 epoch_loss = running_loss / len(dataloaders[phase])
                 writer.add_scalar('train/loss', epoch_loss, epoch)
+                epoch_acc = running_corrects / (
+                        len(dataloaders[phase]) * config.train_batch_size)
+                writer.add_scalar('train/acc', epoch_acc, epoch)
                 writer.add_text('Text', '{} Loss: {:.4f} '.format(phase, epoch_loss),
                                 epoch)
                 print('{} Loss: {:.4f} '.format(phase, epoch_loss))
-                print('{} theta Acc: {:.4f}'.format(phase, running_corrects / (
-                        len(dataloaders[phase]) * config.train_batch_size)))
+                print('{} theta Acc: {:.4f}'.format(phase, epoch_acc))
 
             else:
                 model.eval()
@@ -386,20 +391,34 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
                     target = target.to(device)
                     optimizer.zero_grad()
                     with torch.set_grad_enabled(False):
-                        embedding = model(input, target)
+                        embedding, cos = model(input, target)
                         embeddings.append(embedding)
                         labels.append(target)
-                        # loss = criterion(embedding, target)
-                        # running_loss = running_loss + loss.item()
-                # epoch_loss = running_loss / len(dataloaders[phase])
-                # writer.add_scalar('val/loss', epoch_loss, epoch)
-                # writer.add_text('Text', '{} Loss: {:.4f} '.format(phase, epoch_loss),
-                #                 epoch)
-                # print('{} Loss: {:.4f} '.format(phase, epoch_loss))
+                        loss = criterion(embedding, target)
+                        running_loss = running_loss + loss.item()
+                        label = torch.max(cos.data, 1)[1]
+
+                        for i, j in zip(label, target.data.cpu().numpy()):
+                            if len(label.shape) == 1:
+                                if i == j:
+                                    running_corrects += 1
+                            else:
+                                if i[0] == j[0]:
+                                    running_corrects += 1
+                epoch_loss = running_loss / len(dataloaders[phase])
+                writer.add_scalar('val/loss', epoch_loss, epoch)
+                epoch_acc = running_corrects / (
+                        len(dataloaders[phase]) * config.train_batch_size)
+                writer.add_scalar('val/acc', epoch_acc, epoch)
+                writer.add_text('Text', '{} Loss: {:.4f} '.format(phase, epoch_loss),
+                                epoch)
+                print('{} Loss: {:.4f} '.format(phase, epoch_loss))
+                print('{} theta Acc: {:.4f}'.format(phase, epoch_acc))
+
                 embeddings = torch.cat(embeddings)
                 labels = torch.cat(labels)
                 accuracy, best_threshold, roc_curve_tensor = facade(embeddings, labels)
-                print('{} acc: {:.4f} '.format(phase, accuracy))
+                print('{} metric_acc: {:.4f} '.format(phase, accuracy))
                 print('{} thr: {:.4f} '.format(phase, best_threshold))
 
                 board_val(writer, accuracy, best_threshold, roc_curve_tensor, epoch)
@@ -415,7 +434,7 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
 
 
 def board_val(writer, accuracy, best_threshold, roc_curve_tensor, step):
-    writer.add_scalar('val/accuracy', accuracy, step)
+    writer.add_scalar('val/metric_acc', accuracy, step)
     writer.add_scalar('best_threshold', best_threshold, step)
     writer.add_image('roc_curve', roc_curve_tensor, step)
 
