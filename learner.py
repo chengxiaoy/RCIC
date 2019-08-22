@@ -206,7 +206,7 @@ class Learner:
                         idx = output.max(dim=-1)[1].cpu().numpy()
                         confidence = output.max(dim=-1)[0].cpu().numpy()
 
-                        idx = idx.rehape(-1, 5)
+                        idx = idx.reshape(-1, 5)
                         confidence = confidence.reshape(-1, 5)
                         confi_max_idx = confidence.argmax(axis=1)
                         confi_max = confidence.max(axis=1)
