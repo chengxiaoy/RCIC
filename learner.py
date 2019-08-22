@@ -181,7 +181,7 @@ class Learner:
         submission['sirna'] = true_idx.astype(int)
         submission.to_csv('submission_angle.csv', index=False, columns=['id_code', 'sirna'])
 
-    def confi_evaluate(self, model):
+    def confi_evaluate(self, model, avg=True):
 
         model.eval()
         ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False)
@@ -196,18 +196,24 @@ class Learner:
                 if len(x.size()) == 5:
                     bs, ncrops, c, h, w = x.size()
                     output = model(x.view(-1, c, h, w), _)  # fuse batch size and ncrops
-                    output_avg = output.view(bs, ncrops, -1).mean(1)  # avg over crops
-                    idx = output.max(dim=-1)[1].cpu().numpy()
-                    confidence = output.max(dim=-1)[0].cpu().numpy()
+                    if avg:
+                        output_avg = output.view(bs, ncrops, -1).mean(1)  # avg over crops
+                        idx = output_avg.max(dim=-1)[1].cpu().numpy()
+                        confidence = output_avg.max(dim=-1)[0].cpu().numpy()
+                        preds = np.append(preds, idx, axis=0)
+                        confi = np.append(confi, confidence, axis=0)
+                    else:
+                        idx = output.max(dim=-1)[1].cpu().numpy()
+                        confidence = output.max(dim=-1)[0].cpu().numpy()
 
-                    idx = idx.rehape(-1, 5)
-                    confidence = confidence.reshape(-1, 5)
-                    confi_max_idx = confidence.argmax(axis=1)
-                    confi_max = confidence.max(axis=1)
-                    idx_max = idx[range(len(idx)), confi_max_idx]
-                    print(idx_max)
-                    preds = np.append(preds, idx_max, axis=0)
-                    confi = np.append(confi, confi_max, axis=0)
+                        idx = idx.rehape(-1, 5)
+                        confidence = confidence.reshape(-1, 5)
+                        confi_max_idx = confidence.argmax(axis=1)
+                        confi_max = confidence.max(axis=1)
+                        idx_max = idx[range(len(idx)), confi_max_idx]
+                        print(idx_max)
+                        preds = np.append(preds, idx_max, axis=0)
+                        confi = np.append(confi, confi_max, axis=0)
                 else:
                     output = model(x, _)
                     idx = output.max(dim=-1)[1].cpu().numpy()
