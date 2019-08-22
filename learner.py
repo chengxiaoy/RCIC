@@ -127,14 +127,14 @@ class Learner:
             for i, (input, target) in enumerate(loader):
                 input = input.to(device)
                 target = target.to(device)
-                embedding = model(input, target).cpu().numpy()
+                embedding,cos = model(input, target).cpu().numpy()
                 train_embeddings.append(embedding)
                 train_labels.append(target.cpu().numpy())
 
             for i, (input, target) in enumerate(val_loader):
                 input = input.to(device)
                 target = target.to(device)
-                embedding = model(input, target).cpu().numpy()
+                embedding,cos = model(input, target).cpu().numpy()
                 train_embeddings.append(embedding)
                 train_labels.append(target.cpu().numpy())
 
@@ -158,9 +158,9 @@ class Learner:
 
             test_embeddings = []
             for i, (input, target) in enumerate(tloader):
-                nput = input.to(device)
+                input = input.to(device)
                 # target = target.to(device)
-                embedding = model(input, target).cpu().numpy()
+                embedding,cos = model(input, target).cpu().numpy()
                 test_embeddings.append(embedding)
             test_embeddings = np.concatenate(test_embeddings)
 
