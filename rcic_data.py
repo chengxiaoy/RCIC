@@ -78,7 +78,7 @@ def get_dataset(rgb=True, size=512, pair=False):
 
         ds = ImagesDS(df_train, img_dir, False, mode='train', augmentation=True, size=size)
         ds_val = ImagesDS(df_val, img_dir, False, mode='train', augmentation=True, size=size)
-        ds_test = ImagesDS(df_test, img_dir, False, mode='test', augmentation=True, size=size)
+        ds_test = ImagesDS(df_test, img_dir, False, mode='test', augmentation=False, size=size)
         return ds, ds_val, ds_test
 
 

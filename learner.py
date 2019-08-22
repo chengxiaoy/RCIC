@@ -181,7 +181,7 @@ class Learner:
         submission['sirna'] = true_idx.astype(int)
         submission.to_csv('submission_angle.csv', index=False, columns=['id_code', 'sirna'])
 
-    def confi_evaluate(self, model, avg=True):
+    def confi_evaluate(self, model, avg=False):
 
         model.eval()
         ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False)
