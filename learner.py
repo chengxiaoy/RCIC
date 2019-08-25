@@ -34,7 +34,7 @@ class Config():
     val_batch_size = 64
     test_batch_size = 64
 
-    device_ids = [0,1,2, 3]
+    device_ids = [0, 1, 2, 3]
     use_rgb = False
     backbone = 'resnet_50'
     head_type = 'arcface'
@@ -72,7 +72,8 @@ class Learner:
         return model
 
     def stage_one(self):
-        model = self.build_model(weight_path='models/stage1_Aug22_06-57-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
+        model = self.build_model(
+            weight_path='models/stage1_Aug22_06-57-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
 
         ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False)
         loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16)
@@ -99,8 +100,9 @@ class Learner:
         model = torch.nn.DataParallel(model, device_ids=self.config.device_ids)
 
         ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=True)
-        loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16)
-        val_loader = D.DataLoader(ds_val, batch_size=self.config.val_batch_size, shuffle=False, num_workers=16)
+        loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16, drop_last=True)
+        val_loader = D.DataLoader(ds_val, batch_size=self.config.val_batch_size, shuffle=False, num_workers=16,
+                                  drop_last=True)
 
         # criterion = nn.CrossEntropyLoss()
         criterion = ArcFaceLoss()
@@ -127,14 +129,14 @@ class Learner:
             for i, (input, target) in enumerate(loader):
                 input = input.to(device)
                 target = target.to(device)
-                embedding,cos = model(input, target).cpu().numpy()
+                embedding, cos = model(input, target).cpu().numpy()
                 train_embeddings.append(embedding)
                 train_labels.append(target.cpu().numpy())
 
             for i, (input, target) in enumerate(val_loader):
                 input = input.to(device)
                 target = target.to(device)
-                embedding,cos = model(input, target).cpu().numpy()
+                embedding, cos = model(input, target).cpu().numpy()
                 train_embeddings.append(embedding)
                 train_labels.append(target.cpu().numpy())
 
@@ -160,7 +162,7 @@ class Learner:
             for i, (input, target) in enumerate(tloader):
                 input = input.to(device)
                 # target = target.to(device)
-                embedding,cos = model(input, target).cpu().numpy()
+                embedding, cos = model(input, target).cpu().numpy()
                 test_embeddings.append(embedding)
             test_embeddings = np.concatenate(test_embeddings)
 
