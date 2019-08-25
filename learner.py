@@ -385,6 +385,7 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
                 print('{} theta Acc: {:.4f}'.format(phase, epoch_acc))
 
             else:
+                running_corrects = 0
                 model.eval()
                 embeddings = []
                 labels = []
