@@ -26,15 +26,15 @@ from datetime import datetime
 from evaluate import facade
 from loss.advance_loss import ArcFaceLoss
 
-device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class Config():
-    train_batch_size = 32
-    val_batch_size = 32
-    test_batch_size = 32
+    train_batch_size = 64
+    val_batch_size = 64
+    test_batch_size = 64
 
-    device_ids = [2, 3]
+    device_ids = [0,1,2, 3]
     use_rgb = False
     backbone = 'resnet_50'
     head_type = 'arcface'
