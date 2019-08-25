@@ -67,7 +67,7 @@ class My_Model(Module):
             output = F.normalize(output)
 
             # if self.training:
-            cos = self.arcface(output, labels)
+            cos = self.arcface(output)
             return output, cos
 
     def __repr__(self):
