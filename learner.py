@@ -396,7 +396,7 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
                         embedding, cos = model(input, target)
                         embeddings.append(embedding)
                         labels.append(target)
-                        loss = criterion(embedding, target)
+                        loss = criterion(cos, target)
                         running_loss = running_loss + loss.item()
                         label = torch.max(cos.data, 1)[1]
 
