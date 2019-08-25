@@ -39,7 +39,7 @@ class My_Model(Module):
 
         self.head_type = head_type
         self.output_layer = Sequential(
-            BatchNorm2d(self.num_ftrs),
+            # BatchNorm2d(self.num_ftrs),
             Dropout(0.3),
             Flatten(),
             Linear(self.num_ftrs, int(embedding_size)),
