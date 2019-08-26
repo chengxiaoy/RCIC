@@ -30,11 +30,11 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class Config():
-    train_batch_size = 32
-    val_batch_size = 32
-    test_batch_size = 32
+    train_batch_size = 64
+    val_batch_size = 64
+    test_batch_size = 64
 
-    device_ids = [0, 1]
+    device_ids = [0, 1, 2, 3]
     use_rgb = False
     backbone = 'resnet_50'
     head_type = 'arcface'
@@ -373,6 +373,17 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
     best_model_wts = copy.deepcopy(model.state_dict())
 
     for epoch in range(num_epochs):
+
+        if epoch == 1:
+            for name, child in model.backbone.named_children():
+                for param in child.parameters():
+                    param.requires_grad = False
+
+        else:
+            for name, child in model.named_children():
+                for param in child.parameters():
+                    param.requires_grad = True
+
         running_loss = 0.0
         running_corrects = 0
 
@@ -412,6 +423,7 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
                 print('{} theta Acc: {:.4f}'.format(phase, epoch_acc))
 
             else:
+                running_loss = 0.0
                 running_corrects = 0
                 model.eval()
                 embeddings = []
@@ -450,7 +462,6 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
                     torch.save(model.state_dict(), 'models/' + name + "_theta.pth")
                     best_model_wts = copy.deepcopy(model.state_dict())
 
-
                 embeddings = torch.cat(embeddings)
                 labels = torch.cat(labels)
                 accuracy, best_threshold, roc_curve_tensor = facade(embeddings, labels)
@@ -463,7 +474,6 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
                     max_acc = accuracy
                     torch.save(model.state_dict(), 'models/' + name + ".pth")
                     best_model_wts = copy.deepcopy(model.state_dict())
-
 
                 scheduler.step(accuracy)
 
@@ -483,14 +493,14 @@ if __name__ == "__main__":
     learner = Learner(config)
     # s1_model = learner.stage_one()
     # learner.confi_evaluate(s1_model)
-    s1_model = learner.build_model(
-        weight_path='models/stage1_Aug23_09-17-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
-    # learner.confi_evaluate(s1_model)
+    # s1_model = learner.build_model(
+    #     weight_path='models/stage1_Aug23_09-17-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
+    #
+    #
+    # s2_model = learner.stage_two(s1_model)
 
-    s2_model = learner.stage_two(s1_model)
-
-    # s2_model = learner.build_model(
-    #     weight_path='models/stage2_Aug25_12-47-lr1_0.0001_lr2_0.0001_bs_64_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth',
-    #     mode='arcface')
+    s2_model = learner.build_model(
+        weight_path='models/stage2_Aug26_02-48-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_theta.pth',
+        mode='arcface')
 
     learner.angle_evaluate(s2_model)
