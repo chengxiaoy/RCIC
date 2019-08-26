@@ -42,7 +42,7 @@ class Config():
     pic_size = 448
 
     stage1_epoch = 30
-    stage2_epoch = 30
+    stage2_epoch = 60
 
     stage1_lr = 0.0001
     stage2_lr = 0.0001
@@ -368,6 +368,8 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
 def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, num_epochs, name, config):
     min_loss = float('inf')
     max_acc = 0.0
+    max_theta_acc = 0.0
+
     best_model_wts = copy.deepcopy(model.state_dict())
 
     for epoch in range(num_epochs):
@@ -443,6 +445,12 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
                 print('{} Loss: {:.4f} '.format(phase, epoch_loss))
                 print('{} theta Acc: {:.4f}'.format(phase, epoch_acc))
 
+                if epoch_acc > max_theta_acc:
+                    max_theta_acc = epoch_acc
+                    torch.save(model.state_dict(), 'models/' + name + "_theta.pth")
+                    best_model_wts = copy.deepcopy(model.state_dict())
+
+
                 embeddings = torch.cat(embeddings)
                 labels = torch.cat(labels)
                 accuracy, best_threshold, roc_curve_tensor = facade(embeddings, labels)
@@ -455,6 +463,8 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
                     max_acc = accuracy
                     torch.save(model.state_dict(), 'models/' + name + ".pth")
                     best_model_wts = copy.deepcopy(model.state_dict())
+
+
                 scheduler.step(accuracy)
 
     model.load_state_dict(best_model_wts)
@@ -473,14 +483,14 @@ if __name__ == "__main__":
     learner = Learner(config)
     # s1_model = learner.stage_one()
     # learner.confi_evaluate(s1_model)
-    # s1_model = learner.build_model(
-    #     weight_path='models/stage1_Aug23_09-17-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
+    s1_model = learner.build_model(
+        weight_path='models/stage1_Aug23_09-17-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
     # learner.confi_evaluate(s1_model)
 
-    # s2_model = learner.stage_two(s1_model)
+    s2_model = learner.stage_two(s1_model)
 
-    s2_model = learner.build_model(
-        weight_path='models/stage2_Aug25_12-47-lr1_0.0001_lr2_0.0001_bs_64_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth',
-        mode='arcface')
+    # s2_model = learner.build_model(
+    #     weight_path='models/stage2_Aug25_12-47-lr1_0.0001_lr2_0.0001_bs_64_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth',
+    #     mode='arcface')
 
     learner.angle_evaluate(s2_model)
