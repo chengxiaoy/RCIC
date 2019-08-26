@@ -112,7 +112,7 @@ class Learner:
         writer = SummaryWriter(logdir=os.path.join("board", "stage2_" + self.experiment_name))
         s2_model = train_model_s2(model, criterion, optimizer, lr_scheduler,
                                   {'train': loader, 'val': val_loader}, writer,
-                                  self.config.stage1_epoch, "stage2_" + self.experiment_name, self.config)
+                                  self.config.stage2_epoch, "stage2_" + self.experiment_name, self.config)
 
         return s2_model
 
