@@ -380,7 +380,7 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
                     param.requires_grad = False
 
         else:
-            for name, child in model.named_children():
+            for name, child in model.module.named_children():
                 for param in child.parameters():
                     param.requires_grad = True
 
