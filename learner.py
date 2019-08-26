@@ -62,8 +62,8 @@ class Learner:
         self.experiment_name = datetime.now().strftime('%b%d_%H-%M') + "-" + str(config)
         self.experiment_time = datetime.now().strftime('%b%d_%H-%M')
 
-    def build_model(self, weight_path=None):
-        model = get_model(self.config.backbone, self.config.use_rgb, 'line')
+    def build_model(self, weight_path=None, mode='line'):
+        model = get_model(self.config.backbone, self.config.use_rgb, mode)
         model = model.to(device)
         model = torch.nn.DataParallel(model, device_ids=self.config.device_ids)
         if weight_path is not None:
@@ -129,14 +129,18 @@ class Learner:
             for i, (input, target) in enumerate(loader):
                 input = input.to(device)
                 target = target.to(device)
-                embedding, cos = model(input, target).cpu().numpy()
+                embedding, cos = model(input, target)
+                embedding = embedding.cpu().numpy()
+                cos = cos.cpu().numpy()
                 train_embeddings.append(embedding)
                 train_labels.append(target.cpu().numpy())
 
             for i, (input, target) in enumerate(val_loader):
                 input = input.to(device)
                 target = target.to(device)
-                embedding, cos = model(input, target).cpu().numpy()
+                embedding, cos = model(input, target)
+                embedding = embedding.cpu().numpy()
+                cos = cos.cpu().numpy()
                 train_embeddings.append(embedding)
                 train_labels.append(target.cpu().numpy())
 
@@ -159,11 +163,32 @@ class Learner:
             joblib.dump(center_features, 'center_features.pkl')
 
             test_embeddings = []
+            preds = np.empty(0)
+            confi = np.empty(0)
             for i, (input, target) in enumerate(tloader):
                 input = input.to(device)
                 # target = target.to(device)
-                embedding, cos = model(input, target).cpu().numpy()
+                embedding, cos = model(input, target)
+                embedding = embedding.cpu().numpy()
+
+                idx = cos.max(dim=-1)[1].cpu().numpy()
+                confidence = cos.max(dim=-1)[0].cpu().numpy()
+                preds = np.append(preds, idx, axis=0)
+                confi = np.append(confi, confidence, axis=0)
+
                 test_embeddings.append(embedding)
+
+            true_idx = np.empty(0)
+            for i in range(19897):
+                if confi[i] > confi[i + 19897]:
+                    true_idx = np.append(true_idx, preds[i])
+                else:
+                    true_idx = np.append(true_idx, preds[i + 19897])
+
+            submission = pd.read_csv('data/test.csv')
+            submission['sirna'] = true_idx.astype(int)
+            submission.to_csv('s2_submission.csv', index=False, columns=['id_code', 'sirna'])
+
             test_embeddings = np.concatenate(test_embeddings)
 
             joblib.dump(test_embeddings, 'test_embeddings.pkl')
@@ -448,9 +473,14 @@ if __name__ == "__main__":
     learner = Learner(config)
     # s1_model = learner.stage_one()
     # learner.confi_evaluate(s1_model)
-    s1_model = learner.build_model(
-        weight_path='models/stage1_Aug23_09-17-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
+    # s1_model = learner.build_model(
+    #     weight_path='models/stage1_Aug23_09-17-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
     # learner.confi_evaluate(s1_model)
 
-    s2_model = learner.stage_two(s1_model)
+    # s2_model = learner.stage_two(s1_model)
+
+    s2_model = learner.build_model(
+        weight_path='stage2_Aug25_12-47-lr1_0.0001_lr2_0.0001_bs_64_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth',
+        mode='arcface')
+
     learner.angle_evaluate(s2_model)
