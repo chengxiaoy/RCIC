@@ -30,11 +30,11 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class Config():
-    train_batch_size = 64
-    val_batch_size = 64
-    test_batch_size = 64
+    train_batch_size = 32
+    val_batch_size = 32
+    test_batch_size = 32
 
-    device_ids = [0, 1, 2, 3]
+    device_ids = [0, 1]
     use_rgb = False
     backbone = 'resnet_50'
     head_type = 'arcface'
