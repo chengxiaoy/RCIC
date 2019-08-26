@@ -480,7 +480,7 @@ if __name__ == "__main__":
     # s2_model = learner.stage_two(s1_model)
 
     s2_model = learner.build_model(
-        weight_path='stage2_Aug25_12-47-lr1_0.0001_lr2_0.0001_bs_64_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth',
+        weight_path='models/stage2_Aug25_12-47-lr1_0.0001_lr2_0.0001_bs_64_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth',
         mode='arcface')
 
     learner.angle_evaluate(s2_model)
