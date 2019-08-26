@@ -374,8 +374,8 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
 
     for epoch in range(num_epochs):
 
-        if epoch == 1:
-            for name, child in model.backbone.named_children():
+        if epoch == 0:
+            for name, child in model.module.backbone.named_children():
                 for param in child.parameters():
                     param.requires_grad = False
 
