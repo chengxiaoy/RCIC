@@ -36,7 +36,7 @@ class Config():
 
     device_ids = [0, 1]
     use_rgb = False
-    backbone = 'resnet_50'
+    backbone = 'densenet201'
     head_type = 'arcface'
     classes = 1108
     pic_size = 448
@@ -491,12 +491,12 @@ if __name__ == "__main__":
     config = Config()
 
     learner = Learner(config)
-    # s1_model = learner.stage_one()
-    # learner.confi_evaluate(s1_model)
+    s1_model = learner.stage_one()
+    learner.confi_evaluate(s1_model)
     # s1_model = learner.build_model(
     #     weight_path='models/stage1_Aug23_09-17-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
 
-    s1_model = learner.build_model()
+    # s1_model = learner.build_model()
 
     s2_model = learner.stage_two(s1_model)
 
