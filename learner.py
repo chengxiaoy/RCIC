@@ -470,12 +470,12 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
 
                 board_val(writer, accuracy, best_threshold, roc_curve_tensor, epoch)
 
-                if accuracy > max_acc:
-                    max_acc = accuracy
-                    torch.save(model.state_dict(), 'models/' + name + ".pth")
-                    best_model_wts = copy.deepcopy(model.state_dict())
+                # if accuracy > max_acc:
+                #     max_acc = accuracy
+                #     torch.save(model.state_dict(), 'models/' + name + ".pth")
+                #     best_model_wts = copy.deepcopy(model.state_dict())
 
-                scheduler.step(accuracy)
+                scheduler.step(epoch_acc)
 
     model.load_state_dict(best_model_wts)
     return model
@@ -493,9 +493,10 @@ if __name__ == "__main__":
     learner = Learner(config)
     # s1_model = learner.stage_one()
     # learner.confi_evaluate(s1_model)
-    s1_model = learner.build_model(
-        weight_path='models/stage1_Aug23_09-17-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
+    # s1_model = learner.build_model(
+    #     weight_path='models/stage1_Aug23_09-17-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
 
+    s1_model = learner.build_model()
 
     s2_model = learner.stage_two(s1_model)
 
