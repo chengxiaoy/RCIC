@@ -72,8 +72,7 @@ class Learner:
         return model
 
     def stage_one(self):
-        model = self.build_model(
-            weight_path='models/stage1_Aug22_06-57-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
+        model = self.build_model()
 
         ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False)
         loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16)
