@@ -365,7 +365,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
     return model
 
 
-def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, num_epochs, name, config):
+def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, num_epochs, model_name, config):
     min_loss = float('inf')
     max_acc = 0.0
     max_theta_acc = 0.0
@@ -374,15 +374,15 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
 
     for epoch in range(num_epochs):
 
-        if epoch == 0:
-            for name, child in model.module.backbone.named_children():
-                for param in child.parameters():
-                    param.requires_grad = False
-
-        else:
-            for name, child in model.module.named_children():
-                for param in child.parameters():
-                    param.requires_grad = True
+        # if epoch == 0:
+        #     for name, child in model.module.backbone.named_children():
+        #         for param in child.parameters():
+        #             param.requires_grad = False
+        #
+        # else:
+        #     for name, child in model.module.named_children():
+        #         for param in child.parameters():
+        #             param.requires_grad = True
 
         running_loss = 0.0
         running_corrects = 0
@@ -459,7 +459,7 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
 
                 if epoch_acc > max_theta_acc:
                     max_theta_acc = epoch_acc
-                    torch.save(model.state_dict(), 'models/' + name + "_theta.pth")
+                    torch.save(model.state_dict(), 'models/' + model_name + "_theta.pth")
                     best_model_wts = copy.deepcopy(model.state_dict())
 
                 embeddings = torch.cat(embeddings)
