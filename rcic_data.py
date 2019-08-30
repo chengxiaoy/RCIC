@@ -60,7 +60,7 @@ def val_pair(df_val):
     return val
 
 
-def get_dataset(rgb=True, size=512, pair=False):
+def get_dataset(rgb=True, size=512, pair=False, six_channel=False):
     if rgb:
         rgb_df = pd.read_csv(rgb_train_csv_path)
         df_train, df_val = train_test_split(rgb_df, test_size=0.12, stratify=rgb_df.sirna, random_state=42)
@@ -83,9 +83,9 @@ def get_dataset(rgb=True, size=512, pair=False):
             # build same pair for metric in val phase
             df_val = val_pair(df_val)
 
-        ds = ImagesDS(df_train, img_dir, False, mode='train', augmentation=True, size=size, six_channel=True)
-        ds_val = ImagesDS(df_val, img_dir, False, mode='train', augmentation=True, size=size, six_channel=True)
-        ds_test = ImagesDS(df_test, img_dir, False, mode='test', augmentation=False, size=size, six_channel=True)
+        ds = ImagesDS(df_train, img_dir, False, mode='train', augmentation=True, size=size, six_channel=six_channel)
+        ds_val = ImagesDS(df_val, img_dir, False, mode='train', augmentation=True, size=size, six_channel=six_channel)
+        ds_test = ImagesDS(df_test, img_dir, False, mode='test', augmentation=False, size=size, six_channel=six_channel)
         return ds, ds_val, ds_test
 
 

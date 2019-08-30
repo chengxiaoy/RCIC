@@ -46,6 +46,7 @@ class Config():
 
     stage1_lr = 0.0001
     stage2_lr = 0.0001
+    six_channel_aug = True
 
     def __repr__(self):
         return "lr1_{}_lr2_{}_bs_{}_ps_{}_backbone_{}_head_{}_rgb_{}".format(self.stage1_lr,
@@ -74,7 +75,8 @@ class Learner:
     def stage_one(self):
         model = self.build_model()
 
-        ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False)
+        ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False,
+                                          six_channel=config.six_channel_aug)
         loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16)
         val_loader = D.DataLoader(ds_val, batch_size=self.config.val_batch_size, shuffle=False, num_workers=16)
 
@@ -496,8 +498,6 @@ if __name__ == "__main__":
     # learner.confi_evaluate(s1_model)
     # s1_model = learner.build_model(
     #     weight_path='models/stage1_Aug23_09-17-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
-
-
 
     # s2_model = learner.stage_two(s1_model)
 
