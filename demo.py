@@ -2,6 +2,9 @@ from torchvision import transforms
 from PIL import Image
 import torch
 import random
+import cv2
+import numpy as np
+
 
 from albumentations import (
     HorizontalFlip, IAAPerspective, ShiftScaleRotate, CLAHE, RandomRotate90,
@@ -9,7 +12,7 @@ from albumentations import (
     IAAAdditiveGaussianNoise, GaussNoise, MotionBlur, MedianBlur, RandomBrightnessContrast, IAAPiecewiseAffine,
     IAASharpen, IAAEmboss, Flip, OneOf, Compose
 )
-
+import torch
 
 def strong_aug(p=.5):
     return Compose([
@@ -32,7 +35,7 @@ def strong_aug(p=.5):
             IAAPiecewiseAffine(p=0.3),
         ], p=0.2),
         OneOf([
-            CLAHE(clip_limit=2),
+            # CLAHE(clip_limit=2),
             IAASharpen(),
             IAAEmboss(),
             RandomBrightnessContrast(),
@@ -40,12 +43,35 @@ def strong_aug(p=.5):
         HueSaturationValue(p=0.3),
     ], p=p)
 
+aug = strong_aug(p=1)
+#
+#
+#
+#
+#
+# image = cv2.imread('test.jpg')
+# cv2.imshow('bgr',image)
+# cv2.waitKey(1000)
+# image = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
+# cv2.imshow('rgb',image)
 
+
+
+
+
+# pytorchvision
 img = Image.open('test.jpg')
+tensor = transforms.ToTensor()(img)
+img1 = Image.open('test.jpg')
+img = np.array(img)
+img1 = np.array(img1)
+img = np.concatenate([img,img1],axis = 2)
+img3 = cv2.flip(img,0)
+hehe = aug(image = img)
 
 trans = transforms.Compose([
-    transforms.FiveCrop(256),
-    transforms.Lambda(lambda crops: torch.stack([transforms.ToTensor()(crop) for crop in crops]))
+    transforms.ToTensor(),
+    # transforms.Lambda(lambda crops: torch.stack([transforms.ToTensor()(crop) for crop in crops]))
     # transforms.Lambda(lambd=lambda crops: crops[random.randint(0, 4)])
 
 ])

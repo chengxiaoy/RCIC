@@ -36,13 +36,13 @@ class Config():
 
     device_ids = [0, 1]
     use_rgb = False
-    backbone = 'densenet201'
+    backbone = 'resnet50'
     head_type = 'arcface'
     classes = 1108
     pic_size = 448
 
-    stage1_epoch = 60
-    stage2_epoch = 60
+    stage1_epoch = 40
+    stage2_epoch = 40
 
     stage1_lr = 0.0001
     stage2_lr = 0.0001
@@ -82,7 +82,8 @@ class Learner:
         # criterion = trick.LabelSmoothing(1108, 0.1)
         optimizer = torch.optim.Adam(model.parameters(), lr=self.config.stage1_lr)
 
-        lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
+        # lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
+        lr_scheduler = MultiStepLR(optimizer, [20, 30], 0.1)
 
         writer = SummaryWriter(logdir=os.path.join("board", "stage1_" + self.experiment_name))
         s1_pretrained_model = train_model(model, criterion, optimizer, lr_scheduler,
@@ -106,7 +107,8 @@ class Learner:
         # criterion = nn.CrossEntropyLoss()
         criterion = ArcFaceLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=self.config.stage2_lr)
-        lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
+        # lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
+        lr_scheduler = MultiStepLR(optimizer, [20, 30], 0.1)
 
         writer = SummaryWriter(logdir=os.path.join("board", "stage2_" + self.experiment_name))
         s2_model = train_model_s2(model, criterion, optimizer, lr_scheduler,
@@ -490,17 +492,17 @@ if __name__ == "__main__":
     config = Config()
 
     learner = Learner(config)
-    s1_model = learner.stage_one()
-    learner.confi_evaluate(s1_model)
+    # s1_model = learner.stage_one()
+    # learner.confi_evaluate(s1_model)
     # s1_model = learner.build_model(
     #     weight_path='models/stage1_Aug23_09-17-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False.pth')
 
-    # s1_model = learner.build_model()
 
-    s2_model = learner.stage_two(s1_model)
 
-    # s2_model = learner.build_model(
-    #     weight_path='models/stage2_Aug26_02-48-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_theta.pth',
-    #     mode='arcface')
+    # s2_model = learner.stage_two(s1_model)
+
+    s2_model = learner.build_model(
+        weight_path='models/stage2_Aug28_08-42-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_densenet201_head_arcface_rgb_False_theta.pth',
+        mode='arcface')
 
     learner.angle_evaluate(s2_model)

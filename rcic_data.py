@@ -17,6 +17,13 @@ from collections import defaultdict
 from random import sample, choice
 from loss import trick
 
+from albumentations import (
+    HorizontalFlip, IAAPerspective, ShiftScaleRotate, CLAHE, RandomRotate90, Resize,
+    Transpose, ShiftScaleRotate, Blur, OpticalDistortion, GridDistortion, HueSaturationValue,
+    IAAAdditiveGaussianNoise, GaussNoise, MotionBlur, MedianBlur, RandomBrightnessContrast, IAAPiecewiseAffine,
+    IAASharpen, IAAEmboss, Flip, OneOf, Compose
+)
+
 rgb_train_csv_path = 'new_train.csv'
 rgb_test_csv_path = 'new_test.csv'
 
@@ -76,14 +83,14 @@ def get_dataset(rgb=True, size=512, pair=False):
             # build same pair for metric in val phase
             df_val = val_pair(df_val)
 
-        ds = ImagesDS(df_train, img_dir, False, mode='train', augmentation=True, size=size)
-        ds_val = ImagesDS(df_val, img_dir, False, mode='train', augmentation=True, size=size)
-        ds_test = ImagesDS(df_test, img_dir, False, mode='test', augmentation=False, size=size)
+        ds = ImagesDS(df_train, img_dir, False, mode='train', augmentation=True, size=size, six_channel=True)
+        ds_val = ImagesDS(df_val, img_dir, False, mode='train', augmentation=True, size=size, six_channel=True)
+        ds_test = ImagesDS(df_test, img_dir, False, mode='test', augmentation=False, size=size, six_channel=True)
         return ds, ds_val, ds_test
 
 
 class ImagesDS(D.Dataset):
-    def __init__(self, df, img_dir, rgb, mode='train', augmentation=False, size=512, site=1,
+    def __init__(self, df, img_dir, rgb, mode='train', augmentation=False, size=512, six_channel=False, site=1,
                  channels=[1, 2, 3, 4, 5, 6]):
         self.records = df.to_records(index=False)
         self.channels = channels
@@ -97,6 +104,7 @@ class ImagesDS(D.Dataset):
         self.augmentation = augmentation
         self.rgb = rgb
         self.size = size
+        self.six_channel_augment = six_channel
 
     def _load_img_as_tensor(self, file_name, size):
         with Image.open(file_name) as img:
@@ -126,6 +134,37 @@ class ImagesDS(D.Dataset):
         experiment, well, plate = self.records[index].experiment, self.records[index].well, self.records[index].plate
         return '/'.join([self.img_dir, self.mode, experiment, f'Plate{plate}', f'{well}_s{site}_w{channel}.png'])
 
+    def six_channel_transform(self, arr):
+        aug = Compose([
+            Resize(height=self.size, width=self.size),
+            RandomRotate90(),
+            Flip(),
+            Transpose(),
+            OneOf([
+                IAAAdditiveGaussianNoise(),
+                GaussNoise(),
+            ], p=0.2),
+            OneOf([
+                MotionBlur(p=.2),
+                MedianBlur(blur_limit=3, p=0.1),
+                Blur(blur_limit=3, p=0.1),
+            ], p=0.2),
+            ShiftScaleRotate(shift_limit=0.0625, scale_limit=0.2, rotate_limit=45, p=0.2),
+            OneOf([
+                OpticalDistortion(p=0.3),
+                GridDistortion(p=.1),
+                IAAPiecewiseAffine(p=0.3),
+            ], p=0.2),
+            OneOf([
+                IAASharpen(),
+                IAAEmboss(),
+                RandomBrightnessContrast(),
+            ], p=0.3),
+            HueSaturationValue(p=0.3),
+        ], p=1)
+        ret = aug(image=arr)['image']
+        return ret
+
     def _transform(self, img, augumentation):
         if augumentation:
             trans = torchvision.transforms.Compose([
@@ -141,9 +180,12 @@ class ImagesDS(D.Dataset):
             img = trans(img)
         else:
             trans = torchvision.transforms.Compose([
+                T.Resize(self.size),
+
                 # torchvision.transforms.CenterCrop(224),
                 torchvision.transforms.ToTensor(),
                 # torchvision.transforms.Normalize()
+
                 # torchvision.transforms.RandomGrayscale(p=0.2),
                 # torchvision.transforms.RandomRotation(90),
                 # torchvision.transforms.RandomHorizontalFlip(0.5),
@@ -167,10 +209,15 @@ class ImagesDS(D.Dataset):
             # else:
             #     img = torch.load(tensor_path)
             paths = [self._get_img_path(index, ch, site) for ch in self.channels]
-            # if not self.augmentation:
-            #     img = torch.cat([self._load_img_as_tensor(img_path, self.size) for img_path in paths], dim=1)
-            # else:
-            img = torch.cat([self._load_img_as_tensor(img_path, self.size) for img_path in paths])
+            if not self.six_channel_augment:
+                img = torch.cat([self._load_img_as_tensor(img_path, self.size) for img_path in paths])
+            else:
+                six_channel_img = np.concatenate([np.array(Image.open(path)) for path in paths], axis=2)
+                if self.augmentation:
+                    img = self.six_channel_transform(six_channel_img)
+                    img = self._transform(img, True)
+                else:
+                    img = self._transform(six_channel_img, False)
 
             if self.mode == 'train':
                 return img, int(self.records[index].sirna)
