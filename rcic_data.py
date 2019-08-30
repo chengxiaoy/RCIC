@@ -160,7 +160,6 @@ class ImagesDS(D.Dataset):
                 IAAEmboss(),
                 RandomBrightnessContrast(),
             ], p=0.3),
-            HueSaturationValue(p=0.3),
         ], p=1)
         ret = aug(image=arr)['image']
         return ret
