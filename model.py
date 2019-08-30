@@ -87,6 +87,8 @@ def get_backbone(model_name, use_rgb, classes=1108, pretrained=True):
         model = models.resnet50(pretrained=pretrained)
     elif model_name == 'resnet_101':
         model = models.resnet101(pretrained=pretrained)
+    elif model_name == 'resnext_50':
+        model = models.resnext50_32x4d(pretrained=pretrained)
     elif model_name == 'densenet201':
         model = models.densenet201(pretrained=pretrained)
     elif model_name == 'densenet121':
