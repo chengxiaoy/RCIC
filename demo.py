@@ -60,12 +60,12 @@ aug = strong_aug(p=1)
 
 
 # pytorchvision
-img = Image.open('test.jpg')
+img = Image.open('B02_s1_w1.png')
 tensor = transforms.ToTensor()(img)
-img1 = Image.open('test.jpg')
+img1 = Image.open('B02_s1_w1.png')
 img = np.array(img)
 img1 = np.array(img1)
-img = np.concatenate([img,img1],axis = 2)
+img = np.array([img,img1]).transpose([1,2,0])
 img3 = cv2.flip(img,0)
 hehe = aug(image = img)
 

@@ -212,7 +212,7 @@ class ImagesDS(D.Dataset):
             if not self.six_channel_augment:
                 img = torch.cat([self._load_img_as_tensor(img_path, self.size) for img_path in paths])
             else:
-                six_channel_img = np.concatenate([np.array(Image.open(path)) for path in paths], axis=2)
+                six_channel_img = np.array([np.array(Image.open(path)) for path in paths]).transpose([1, 2, 0])
                 if self.augmentation:
                     img = self.six_channel_transform(six_channel_img)
                     img = self._transform(img, True)
