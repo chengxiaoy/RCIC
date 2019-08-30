@@ -101,7 +101,8 @@ class Learner:
         model.set_head_type('arcface')
         model = torch.nn.DataParallel(model, device_ids=self.config.device_ids)
 
-        ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=True)
+        ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=True,
+                                          six_channel=config.six_channel_aug)
         loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16, drop_last=True)
         val_loader = D.DataLoader(ds_val, batch_size=self.config.val_batch_size, shuffle=False, num_workers=16,
                                   drop_last=True)

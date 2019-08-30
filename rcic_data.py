@@ -84,7 +84,7 @@ def get_dataset(rgb=True, size=512, pair=False, six_channel=False):
             df_val = val_pair(df_val)
 
         ds = ImagesDS(df_train, img_dir, False, mode='train', augmentation=True, size=size, six_channel=six_channel)
-        ds_val = ImagesDS(df_val, img_dir, False, mode='train', augmentation=True, size=size, six_channel=six_channel)
+        ds_val = ImagesDS(df_val, img_dir, False, mode='train', augmentation=False, size=size, six_channel=six_channel)
         ds_test = ImagesDS(df_test, img_dir, False, mode='test', augmentation=False, size=size, six_channel=six_channel)
         return ds, ds_val, ds_test
 
