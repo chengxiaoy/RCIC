@@ -46,7 +46,7 @@ class Config():
 
     stage1_lr = 0.0001
     stage2_lr = 0.0001
-    six_channel_aug = True
+    six_channel_aug = False
 
     def __repr__(self):
         return "lr1_{}_lr2_{}_bs_{}_ps_{}_backbone_{}_head_{}_rgb_{}".format(self.stage1_lr,
@@ -123,7 +123,7 @@ class Learner:
     def angle_evaluate(self, model):
         train_embeddings = []
         train_labels = []
-        ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False)
+        ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False,six_channel=config.six_channel_aug)
         loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16)
         val_loader = D.DataLoader(ds_val, batch_size=self.config.val_batch_size, shuffle=False, num_workers=16)
         tloader = D.DataLoader(ds_test, batch_size=self.config.val_batch_size, shuffle=False, num_workers=16)
@@ -218,7 +218,7 @@ class Learner:
     def confi_evaluate(self, model, avg=False):
 
         model.eval()
-        ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False)
+        ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False,six_channel=config.six_channel_aug)
 
         tloader = D.DataLoader(ds_test, batch_size=self.config.test_batch_size, shuffle=False, num_workers=16)
 
