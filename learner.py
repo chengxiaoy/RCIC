@@ -123,7 +123,8 @@ class Learner:
     def angle_evaluate(self, model):
         train_embeddings = []
         train_labels = []
-        ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False,six_channel=config.six_channel_aug)
+        ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False,
+                                          six_channel=config.six_channel_aug)
         loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16)
         val_loader = D.DataLoader(ds_val, batch_size=self.config.val_batch_size, shuffle=False, num_workers=16)
         tloader = D.DataLoader(ds_test, batch_size=self.config.val_batch_size, shuffle=False, num_workers=16)
@@ -218,7 +219,8 @@ class Learner:
     def confi_evaluate(self, model, avg=False):
 
         model.eval()
-        ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False,six_channel=config.six_channel_aug)
+        ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False,
+                                          six_channel=config.six_channel_aug)
 
         tloader = D.DataLoader(ds_test, batch_size=self.config.test_batch_size, shuffle=False, num_workers=16)
 
@@ -267,6 +269,57 @@ class Learner:
         submission = pd.read_csv('data/test.csv')
         submission['sirna'] = true_idx.astype(int)
         submission.to_csv('submission.csv', index=False, columns=['id_code', 'sirna'])
+
+    def data_leak_evaluate_mask(self):
+        train_csv = pd.read_csv('./data/train.csv')
+        test_csv = pd.read_csv('./data/test.csv')
+        sub = pd.read_csv("submission.csv")
+
+        plate_groups = np.zeros((1108, 4), int)
+        for sirna in range(1108):
+            grp = train_csv.loc[train_csv.sirna == sirna, :].plate.value_counts().index.values
+            assert len(grp) == 3
+            plate_groups[sirna, 0:3] = grp
+            plate_groups[sirna, 3] = 10 - grp.sum()
+
+        all_test_exp = test_csv.experiment.unique()
+        group_plate_probs = np.zeros((len(all_test_exp), 4))
+        for idx in range(len(all_test_exp)):
+            preds = sub.loc[test_csv.experiment == all_test_exp[idx], 'sirna'].values
+            pp_mult = np.zeros((len(preds), 1108))
+            pp_mult[range(len(preds)), preds] = 1
+
+            sub_test = test_csv.loc[test_csv.experiment == all_test_exp[idx], :]
+            assert len(pp_mult) == len(sub_test)
+
+            for j in range(4):
+                mask = np.repeat(plate_groups[np.newaxis, :, j], len(pp_mult), axis=0) == \
+                       np.repeat(sub_test.plate.values[:, np.newaxis], 1108, axis=1)
+
+                group_plate_probs[idx, j] = np.array(pp_mult)[mask].sum() / len(pp_mult)
+        exp_to_group = group_plate_probs.argmax(1)
+        predicted = []
+
+        # todo get the predicate from the model
+
+        def select_plate_group(pp_mult, idx):
+            sub_test = test_csv.loc[test_csv.experiment == all_test_exp[idx], :]
+            assert len(pp_mult) == len(sub_test)
+            mask = np.repeat(plate_groups[np.newaxis, :, exp_to_group[idx]], len(pp_mult), axis=0) != \
+                   np.repeat(sub_test.plate.values[:, np.newaxis], 1108, axis=1)
+            pp_mult[mask] = 0
+            return pp_mult
+
+        for idx in range(len(all_test_exp)):
+            # print('Experiment', idx)
+            indices = (test_csv.experiment == all_test_exp[idx])
+
+            preds = predicted[indices, :].copy()
+
+            preds = select_plate_group(preds, idx)
+            sub.loc[indices, 'sirna'] = preds.argmax(1)
+
+        sub.to_csv('.submission.csv', index=False, columns=['id_code', 'sirna'])
 
 
 def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num_epochs, name, config):
