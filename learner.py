@@ -84,8 +84,8 @@ class Learner:
         # criterion = trick.LabelSmoothing(1108, 0.1)
         optimizer = torch.optim.Adam(model.parameters(), lr=self.config.stage1_lr)
 
-        # lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
-        lr_scheduler = MultiStepLR(optimizer, [20, 30], 0.1)
+        lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=4, verbose=True)
+        # lr_scheduler = MultiStepLR(optimizer, [20, 30], 0.1)
 
         writer = SummaryWriter(logdir=os.path.join("board", "stage1_" + self.experiment_name))
         s1_pretrained_model = train_model(model, criterion, optimizer, lr_scheduler,
@@ -110,8 +110,8 @@ class Learner:
         # criterion = nn.CrossEntropyLoss()
         criterion = ArcFaceLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=self.config.stage2_lr)
-        # lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
-        lr_scheduler = MultiStepLR(optimizer, [20, 30], 0.1)
+        lr_scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=4, verbose=True)
+        # lr_scheduler = MultiStepLR(optimizer, [20, 30], 0.1)
 
         writer = SummaryWriter(logdir=os.path.join("board", "stage2_" + self.experiment_name))
         s2_model = train_model_s2(model, criterion, optimizer, lr_scheduler,

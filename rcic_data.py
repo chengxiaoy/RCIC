@@ -21,8 +21,9 @@ from albumentations import (
     HorizontalFlip, IAAPerspective, ShiftScaleRotate, CLAHE, RandomRotate90, Resize,
     Transpose, ShiftScaleRotate, Blur, OpticalDistortion, GridDistortion, HueSaturationValue,
     IAAAdditiveGaussianNoise, GaussNoise, MotionBlur, MedianBlur, RandomBrightnessContrast, IAAPiecewiseAffine,
-    IAASharpen, IAAEmboss, Flip, OneOf, Compose
+    IAASharpen, IAAEmboss, Flip, OneOf, Compose, RandomCrop,
 )
+import math
 
 rgb_train_csv_path = 'new_train.csv'
 rgb_test_csv_path = 'new_test.csv'
@@ -136,6 +137,15 @@ class ImagesDS(D.Dataset):
 
     def six_channel_transform(self, arr, augment=False):
         if augment:
+            width = self.size
+            height = self.size
+            area = width * height
+            target_area = random.uniform(0.02, 0.4) * area
+            aspect_ratio = random.uniform(0.3, 1 / 0.3)
+
+            h = int(round(math.sqrt(target_area * aspect_ratio)))
+            w = int(round(math.sqrt(target_area / aspect_ratio)))
+
             aug = Compose([
                 Resize(height=self.size, width=self.size),
                 RandomRotate90(),
@@ -161,6 +171,7 @@ class ImagesDS(D.Dataset):
                     IAAEmboss(),
                     RandomBrightnessContrast(),
                 ], p=0.3),
+                RandomCrop(height=h, width=w, always_apply=False, p=0.5),
             ], p=1)
         else:
             aug = Compose([
