@@ -137,14 +137,6 @@ class ImagesDS(D.Dataset):
 
     def six_channel_transform(self, arr, augment=False):
         if augment:
-            width = self.size
-            height = self.size
-            area = width * height
-            target_area = random.uniform(0.02, 0.4) * area
-            aspect_ratio = random.uniform(0.3, 1 / 0.3)
-
-            h = int(round(math.sqrt(target_area * aspect_ratio)))
-            w = int(round(math.sqrt(target_area / aspect_ratio)))
 
             aug = Compose([
                 Resize(height=self.size, width=self.size),
@@ -171,7 +163,6 @@ class ImagesDS(D.Dataset):
                     IAAEmboss(),
                     RandomBrightnessContrast(),
                 ], p=0.3),
-                RandomCrop(height=h, width=w, always_apply=False, p=0.5),
             ], p=1)
         else:
             aug = Compose([
@@ -227,6 +218,8 @@ class ImagesDS(D.Dataset):
                 img = torch.cat([self._load_img_as_tensor(img_path, self.size) for img_path in paths])
             else:
                 six_channel_img = np.array([np.array(Image.open(path)) for path in paths]).transpose([1, 2, 0])
+                if self.augmentation:
+                    six_channel_img = trick.RandomErasing()(six_channel_img)
                 img = self.six_channel_transform(six_channel_img, self.augmentation)
                 img = self._transform(img, True)
 

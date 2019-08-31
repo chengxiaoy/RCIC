@@ -4,7 +4,7 @@ import torch
 import random
 import cv2
 import numpy as np
-
+from loss import trick
 
 from albumentations import (
     HorizontalFlip, IAAPerspective, ShiftScaleRotate, CLAHE, RandomRotate90,
@@ -66,6 +66,7 @@ img1 = Image.open('B02_s1_w1.png')
 img = np.array(img)
 img1 = np.array(img1)
 img = np.array([img,img1,img,img1,img,img1]).transpose([1,2,0])
+six_channel_img = trick.RandomErasing()(img)
 img3 = cv2.flip(img,0)
 hehe = aug(image = img)
 
