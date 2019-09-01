@@ -46,7 +46,7 @@ class Config():
 
     stage1_lr = 0.0001
     stage2_lr = 0.0001
-    six_channel_aug = False
+    six_channel_aug = True
 
     def __repr__(self):
         return "lr1_{}_lr2_{}_bs_{}_ps_{}_backbone_{}_head_{}_rgb_{}".format(self.stage1_lr,
