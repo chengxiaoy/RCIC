@@ -112,17 +112,9 @@ class ImagesDS(D.Dataset):
             img = T.Resize(size)(img)
 
             if not self.augmentation:
-                # trans = T.Compose([
-                #     T.FiveCrop(256),
-                #     T.Lambda(lambda crops: torch.stack([T.ToTensor()(crop) for crop in crops])),
-                #
-                # ])
                 return T.ToTensor()(img)
-                # return trans(img)
             else:
                 transfrom = T.Compose([
-                    # T.FiveCrop(256),
-                    # T.Lambda(lambd=lambda crops: crops[random.randint(0, 4)]),
                     T.RandomRotation(90),
                     T.RandomHorizontalFlip(0.5),
                     T.RandomVerticalFlip(0.5),
@@ -137,7 +129,6 @@ class ImagesDS(D.Dataset):
 
     def six_channel_transform(self, arr, augment=False):
         if augment:
-
             aug = Compose([
                 Resize(height=self.size, width=self.size),
                 RandomRotate90(),
@@ -204,15 +195,6 @@ class ImagesDS(D.Dataset):
         if not self.rgb:
             site = index // self.len + 1
             index = index % self.len
-            # site = random.choice([1, 2])
-            # site = 1
-            # tensor_path = "tensor/" + str(self.records[index].id_code) + "_" + str(site) + '_' + str(self.size) + '.pt'
-            # if not os.path.exists(tensor_path):
-            #     paths = [self._get_img_path(index, ch, site) for ch in self.channels]
-            #     img = torch.cat([self._load_img_as_tensor(img_path, self.size) for img_path in paths])
-            #     torch.save(img, tensor_path)
-            # else:
-            #     img = torch.load(tensor_path)
             paths = [self._get_img_path(index, ch, site) for ch in self.channels]
             if not self.six_channel_augment:
                 img = torch.cat([self._load_img_as_tensor(img_path, self.size) for img_path in paths])
