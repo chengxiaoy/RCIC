@@ -41,20 +41,22 @@ class Config():
     classes = 1108
     pic_size = 448
 
-    stage1_epoch = 40
-    stage2_epoch = 40
+    stage1_epoch = 60
+    stage2_epoch = 60
 
     stage1_lr = 0.0001
     stage2_lr = 0.0001
-    six_channel_aug = True
+    six_channel_aug = False
 
     def __repr__(self):
-        return "lr1_{}_lr2_{}_bs_{}_ps_{}_backbone_{}_head_{}_rgb_{}".format(self.stage1_lr,
-                                                                             self.stage2_lr,
-                                                                             self.train_batch_size,
-                                                                             self.pic_size,
-                                                                             self.backbone, self.head_type,
-                                                                             self.use_rgb)
+        return "lr1_{}_lr2_{}_bs_{}_ps_{}_backbone_{}_head_{}_rgb_{}_six_channel_aug_{}".format(self.stage1_lr,
+                                                                                                self.stage2_lr,
+                                                                                                self.train_batch_size,
+                                                                                                self.pic_size,
+                                                                                                self.backbone,
+                                                                                                self.head_type,
+                                                                                                self.use_rgb,
+                                                                                                self.six_channel_aug)
 
 
 class Learner:
