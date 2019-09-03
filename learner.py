@@ -195,11 +195,12 @@ class Learner:
                     true_idx = np.append(true_idx, preds[i + 19897])
 
             submission = pd.read_csv('data/test.csv')
-            joblib.dump(cosine, 'cos.pkl')
             submission['sirna'] = true_idx.astype(int)
             submission.to_csv('s2_submission.csv', index=False, columns=['id_code', 'sirna'])
 
             test_embeddings = np.concatenate(test_embeddings)
+            cosine = np.concatenate(cosine)
+            joblib.dump(cosine, 'cos.pkl')
 
             joblib.dump(test_embeddings, 'test_embeddings.pkl')
 
