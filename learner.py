@@ -305,7 +305,7 @@ class Learner:
 
                 group_plate_probs[idx, j] = np.array(pp_mult)[mask].sum() / len(pp_mult)
         exp_to_group = group_plate_probs.argmax(1)
-        predicted = []
+        predicted_sides = joblib.load('cos.pkl')
 
         # todo get the predicate from the model
 
@@ -321,10 +321,27 @@ class Learner:
             # print('Experiment', idx)
             indices = (test_csv.experiment == all_test_exp[idx])
 
-            preds = predicted[indices, :].copy()
+            predicted1 = predicted_sides[:19897]
+            predicted2 = predicted_sides[19897:]
+            confi = []
+            preds = []
+            for predicted in [predicted1, predicted2]:
+                preds_side = predicted[indices, :].copy()
+                preds_side = select_plate_group(preds_side, idx)
 
-            preds = select_plate_group(preds, idx)
-            sub.loc[indices, 'sirna'] = preds.argmax(1)
+                confi.append(preds_side.max(axis=1))
+                preds.append(preds_side.argmax(axis=1))
+
+            confi = np.concatenate(confi)
+            preds = np.concatenate(preds)
+            true_idx = np.empty(0)
+            for i in range(indices.sum()):
+                if confi[i] > confi[i + indices.sum()]:
+                    true_idx = np.append(true_idx, preds[i])
+                else:
+                    true_idx = np.append(true_idx, preds[i + indices.sum()])
+
+            sub.loc[indices, 'sirna'] = true_idx.astype(int)
 
         sub.to_csv('dl_submission.csv', index=False, columns=['id_code', 'sirna'])
 
@@ -562,8 +579,10 @@ if __name__ == "__main__":
 
     # s2_model = learner.stage_two(s1_model)
     #
+
+    # learner.data_leak_evaluate_mask()
     s2_model = learner.build_model(
         weight_path='models/stage2_Sep02_02-39-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_theta.pth',
         mode='arcface')
-
+    #
     learner.angle_evaluate(s2_model)
