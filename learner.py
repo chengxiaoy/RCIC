@@ -36,7 +36,7 @@ class Config():
 
     device_ids = [0, 1]
     use_rgb = False
-    backbone = 'resnet_50'
+    backbone = 'densenet201'
     head_type = 'arcface'
     classes = 1108
     pic_size = 448
@@ -572,17 +572,18 @@ if __name__ == "__main__":
     config = Config()
 
     learner = Learner(config)
-    # s1_model = learner.stage_one()
+    s1_model = learner.stage_one()
     # s1_model = learner.build_model(
     #     weight_path='models/stage1_Aug31_05-58-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_densenet201_head_arcface_rgb_False.pth')
-    # learner.confi_evaluate(s1_model)
+    learner.confi_evaluate(s1_model)
 
-    # s2_model = learner.stage_two(s1_model)
+    s2_model = learner.stage_two(s1_model)
     #
 
-    # learner.data_leak_evaluate_mask()
-    s2_model = learner.build_model(
-        weight_path='models/stage2_Sep01_07-15-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_theta.pth',
-        mode='arcface')
+    # s2_model = learner.build_model(
+    #     weight_path='models/stage2_Sep01_07-15-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_theta.pth',
+    #     mode='arcface')
     #
     learner.angle_evaluate(s2_model)
+    # learner.data_leak_evaluate_mask()
+
