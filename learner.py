@@ -126,14 +126,15 @@ class Learner:
         train_embeddings = []
         train_labels = []
         ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False,
-                                          six_channel=self.config.six_channel_aug)
+                                          six_channel=self.config.six_channel_aug, train_aug=False, val_aug=False,
+                                          test_aug=False)
         loader = D.DataLoader(ds, batch_size=self.config.test_batch_size, shuffle=True, num_workers=16)
         val_loader = D.DataLoader(ds_val, batch_size=self.config.test_batch_size, shuffle=False, num_workers=16)
         tloader = D.DataLoader(ds_test, batch_size=self.config.test_batch_size, shuffle=False, num_workers=16)
 
         model.eval()
         with torch.no_grad():
-            for i, (input, target) in enumerate(loader):
+            for i, (input, target) in tqdm(enumerate(loader)):
                 input = input.to(device)
                 target = target.to(device)
                 embedding, cos = model(input, target)
@@ -142,7 +143,7 @@ class Learner:
                 train_embeddings.append(embedding)
                 train_labels.append(target.cpu().numpy())
 
-            for i, (input, target) in enumerate(val_loader):
+            for i, (input, target) in tqdm(enumerate(val_loader)):
                 input = input.to(device)
                 target = target.to(device)
                 embedding, cos = model(input, target)
@@ -173,7 +174,7 @@ class Learner:
             cosine = []
             preds = np.empty(0)
             confi = np.empty(0)
-            for i, (input, target) in enumerate(tloader):
+            for i, (input, target) in tqdm(enumerate(tloader)):
                 input = input.to(device)
                 # target = target.to(device)
                 embedding, cos = model(input, target)
