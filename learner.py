@@ -582,7 +582,7 @@ if __name__ == "__main__":
 
     # learner.data_leak_evaluate_mask()
     s2_model = learner.build_model(
-        weight_path='models/stage2_Sep02_02-39-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_theta.pth',
+        weight_path='models/stage2_Sep01_07-15-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_theta.pth',
         mode='arcface')
     #
     learner.angle_evaluate(s2_model)
