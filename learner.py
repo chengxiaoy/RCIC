@@ -32,7 +32,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 class Config():
     train_batch_size = 32
     val_batch_size = 32
-    test_batch_size = 32
+    test_batch_size = 32 * 7
 
     device_ids = [0, 1]
     use_rgb = False
@@ -127,9 +127,9 @@ class Learner:
         train_labels = []
         ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False,
                                           six_channel=self.config.six_channel_aug)
-        loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16)
-        val_loader = D.DataLoader(ds_val, batch_size=self.config.val_batch_size, shuffle=False, num_workers=16)
-        tloader = D.DataLoader(ds_test, batch_size=self.config.val_batch_size, shuffle=False, num_workers=16)
+        loader = D.DataLoader(ds, batch_size=self.config.test_batch_size, shuffle=True, num_workers=16)
+        val_loader = D.DataLoader(ds_val, batch_size=self.config.test_batch_size, shuffle=False, num_workers=16)
+        tloader = D.DataLoader(ds_test, batch_size=self.config.test_batch_size, shuffle=False, num_workers=16)
 
         model.eval()
         with torch.no_grad():
@@ -170,6 +170,7 @@ class Learner:
             joblib.dump(center_features, 'center_features.pkl')
 
             test_embeddings = []
+            cosine = []
             preds = np.empty(0)
             confi = np.empty(0)
             for i, (input, target) in enumerate(tloader):
@@ -183,6 +184,7 @@ class Learner:
                 preds = np.append(preds, idx, axis=0)
                 confi = np.append(confi, confidence, axis=0)
 
+                cosine.append(cos.cpu().numpy())
                 test_embeddings.append(embedding)
 
             true_idx = np.empty(0)
@@ -193,6 +195,7 @@ class Learner:
                     true_idx = np.append(true_idx, preds[i + 19897])
 
             submission = pd.read_csv('data/test.csv')
+            joblib.dump(cosine, 'cos.pkl')
             submission['sirna'] = true_idx.astype(int)
             submission.to_csv('s2_submission.csv', index=False, columns=['id_code', 'sirna'])
 
@@ -321,7 +324,7 @@ class Learner:
             preds = select_plate_group(preds, idx)
             sub.loc[indices, 'sirna'] = preds.argmax(1)
 
-        sub.to_csv('.submission.csv', index=False, columns=['id_code', 'sirna'])
+        sub.to_csv('dl_submission.csv', index=False, columns=['id_code', 'sirna'])
 
 
 def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num_epochs, name, config):
