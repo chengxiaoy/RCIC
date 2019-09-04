@@ -149,7 +149,7 @@ class ImagesDS(D.Dataset):
                     ], p=0.3),
                 ], p=1)
 
-                img = aug(image=img)['image']
+                img = aug(image=np.array(img))['image']
                 return transfrom(img)
 
     def _get_img_path(self, index, channel, site):
