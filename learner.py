@@ -572,9 +572,9 @@ if __name__ == "__main__":
     config = Config()
 
     learner = Learner(config)
-    s1_model = learner.stage_one()
-    # s1_model = learner.build_model(
-    #     weight_path='models/stage1_Aug31_05-58-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_densenet201_head_arcface_rgb_False.pth')
+    # s1_model = learner.stage_one()
+    s1_model = learner.build_model(
+        weight_path='stage1_Sep03_07-08-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_densenet201_head_arcface_rgb_False_six_channel_aug_False.pth')
     learner.confi_evaluate(s1_model)
 
     s2_model = learner.stage_two(s1_model)
