@@ -585,7 +585,7 @@ if __name__ == "__main__":
 
     # s2_model = learner.stage_two(s1_model)
 
-    for experment in ['RPE', 'U2OS']:
+    for experment in ['HUVEC']:
         config.experment = experment
 
         learner = Learner(config)
