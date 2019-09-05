@@ -548,13 +548,14 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
                     torch.save(model.state_dict(), 'models/' + model_name + "_theta.pth")
                     best_model_wts = copy.deepcopy(model.state_dict())
 
-                embeddings = torch.cat(embeddings)
-                labels = torch.cat(labels)
-                accuracy, best_threshold, roc_curve_tensor = facade(embeddings, labels)
-                print('{} metric_acc: {:.4f} '.format(phase, accuracy))
-                print('{} thr: {:.4f} '.format(phase, best_threshold))
+                if config.experment == 'all':
+                    embeddings = torch.cat(embeddings)
+                    labels = torch.cat(labels)
+                    accuracy, best_threshold, roc_curve_tensor = facade(embeddings, labels)
+                    print('{} metric_acc: {:.4f} '.format(phase, accuracy))
+                    print('{} thr: {:.4f} '.format(phase, best_threshold))
 
-                board_val(writer, accuracy, best_threshold, roc_curve_tensor, epoch)
+                    board_val(writer, accuracy, best_threshold, roc_curve_tensor, epoch)
 
                 # if accuracy > max_acc:
                 #     max_acc = accuracy
