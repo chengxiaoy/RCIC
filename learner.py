@@ -21,7 +21,7 @@ import sys
 from rcic_data import *
 from model import get_basic_model, get_model
 import joblib
-# from tensorboardX import SummaryWriter
+from tensorboardX import SummaryWriter
 from datetime import datetime
 from evaluate import facade
 from loss.advance_loss import ArcFaceLoss
@@ -45,8 +45,8 @@ class Config():
     stage1_epoch = 20
     stage2_epoch = 5
 
-    stage1_lr = 0.00001
-    stage2_lr = 0.00001
+    stage1_lr = 0.0001
+    stage2_lr = 0.0001
     six_channel_aug = False
     experment = 'all'
 
