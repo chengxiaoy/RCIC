@@ -101,9 +101,9 @@ def get_dataset(rgb=True, size=512, pair=False, six_channel=False, train_aug=Tru
             df_train, df_val = train_test_split(rgb_df, test_size=0.12, stratify=rgb_df.sirna, random_state=42)
             df_test = pd.read_csv(test_csv_path)
 
-        if pair:
-            # build same pair for metric in val phase
-            df_val = val_pair(df_val)
+            if pair:
+                # build same pair for metric in val phase
+                df_val = val_pair(df_val)
 
         ds = ImagesDS(df_train, img_dir, False, mode='train', augmentation=train_aug, size=size,
                       six_channel=six_channel)
