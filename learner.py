@@ -21,7 +21,7 @@ import sys
 from rcic_data import *
 from model import get_basic_model, get_model
 import joblib
-from tensorboardX import SummaryWriter
+# from tensorboardX import SummaryWriter
 from datetime import datetime
 from evaluate import facade
 from loss.advance_loss import ArcFaceLoss
@@ -206,7 +206,7 @@ class Learner:
 
             test_embeddings = np.concatenate(test_embeddings)
             cosine = np.concatenate(cosine)
-            joblib.dump(cosine, 'cos.pkl')
+            joblib.dump(cosine, self.config.experment + '_cos.pkl')
 
             joblib.dump(test_embeddings, 'test_embeddings.pkl')
 
@@ -574,7 +574,21 @@ def board_val(writer, accuracy, best_threshold, roc_curve_tensor, step):
     writer.add_image('roc_curve', roc_curve_tensor, step)
 
 
+def merge_submission():
+    sub = pd.read_csv('submission.csv')
+    pred = np.array(sub.sirna)
+    for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
+        # for experment in ['HEPG2', 'RPE', 'U2OS']:
+        file_name = experment + "_s2_submission.csv"
+        sub_df = pd.read_csv(file_name)
+        index = np.array([x.split('-')[0] for x in np.array(sub_df.id_code)]) == experment
+        pred[index] = np.array(sub_df.sirna)[index]
+    sub['sirna'] = pred.astype(int)
+    sub.to_csv('s2_submission.csv', index=False, columns=['id_code', 'sirna'])
+
+
 if __name__ == "__main__":
+    merge_submission()
     config = Config()
 
     # learner = Learner(config)
@@ -585,7 +599,7 @@ if __name__ == "__main__":
 
     # s2_model = learner.stage_two(s1_model)
 
-    for experment in ['HUVEC']:
+    for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
         config.experment = experment
 
         learner = Learner(config)
