@@ -78,7 +78,7 @@ def get_dataset(rgb=True, size=512, pair=False, six_channel=False, train_aug=Tru
 
     if rgb:
         rgb_df = pd.read_csv(rgb_train_csv_path)
-        df_train, df_val = train_test_split(rgb_df, test_size=0.12, stratify=rgb_df.sirna, random_state=42)
+        df_train, df_val = train_test_split(rgb_df, test_size=0.05, stratify=rgb_df.sirna, random_state=42)
         df_test = pd.read_csv(rgb_test_csv_path)
 
         # build same pair for metric in val phase
@@ -95,10 +95,12 @@ def get_dataset(rgb=True, size=512, pair=False, six_channel=False, train_aug=Tru
         if experment != 'all':
             index = np.array([x.split('-')[0] for x in np.array(rgb_df.experiment)]) == experment
             rgb_df = rgb_df[index]
+            df_train, df_val = train_test_split(rgb_df, test_size=0.12, random_state=42)
+            df_test = pd.read_csv(test_csv_path)
+        else:
+            df_train, df_val = train_test_split(rgb_df, test_size=0.12, stratify=rgb_df.sirna, random_state=42)
+            df_test = pd.read_csv(test_csv_path)
 
-
-        df_train, df_val = train_test_split(rgb_df, test_size=0.12, stratify=rgb_df.sirna, random_state=42)
-        df_test = pd.read_csv(test_csv_path)
         if pair:
             # build same pair for metric in val phase
             df_val = val_pair(df_val)
