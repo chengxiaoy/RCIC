@@ -43,7 +43,7 @@ class Config():
     pic_size = 448
 
     stage1_epoch = 20
-    stage2_epoch = 20
+    stage2_epoch = 5
 
     stage1_lr = 0.00001
     stage2_lr = 0.00001
@@ -585,7 +585,7 @@ if __name__ == "__main__":
 
     # s2_model = learner.stage_two(s1_model)
 
-    for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
+    for experment in ['RPE', 'U2OS']:
         config.experment = experment
 
         learner = Learner(config)
