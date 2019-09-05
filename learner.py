@@ -29,6 +29,7 @@ from loss.advance_loss import ArcFaceLoss
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
+# ['HEPG2', 'HUVEC', 'RPE', 'U2OS','all']
 class Config():
     train_batch_size = 32
     val_batch_size = 32
@@ -42,21 +43,24 @@ class Config():
     pic_size = 448
 
     stage1_epoch = 20
-    stage2_epoch = 60
+    stage2_epoch = 20
 
     stage1_lr = 0.00001
-    stage2_lr = 0.0001
+    stage2_lr = 0.00001
     six_channel_aug = False
+    experment = 'all'
 
     def __repr__(self):
-        return "lr1_{}_lr2_{}_bs_{}_ps_{}_backbone_{}_head_{}_rgb_{}_six_channel_aug_{}".format(self.stage1_lr,
-                                                                                                self.stage2_lr,
-                                                                                                self.train_batch_size,
-                                                                                                self.pic_size,
-                                                                                                self.backbone,
-                                                                                                self.head_type,
-                                                                                                self.use_rgb,
-                                                                                                self.six_channel_aug)
+        return "lr1_{}_lr2_{}_bs_{}_ps_{}_backbone_{}_head_{}_rgb_{}_six_channel_aug_{}_experment_{}".format(
+            self.stage1_lr,
+            self.stage2_lr,
+            self.train_batch_size,
+            self.pic_size,
+            self.backbone,
+            self.head_type,
+            self.use_rgb,
+            self.six_channel_aug,
+            self.experment)
 
 
 class Learner:
@@ -75,7 +79,8 @@ class Learner:
         return model
 
     def stage_one(self):
-        model = self.build_model(weight_path='models/stage1_Sep04_05-11-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False.pth')
+        model = self.build_model(
+            weight_path='models/stage1_Sep04_05-11-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False.pth')
 
         ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=False,
                                           six_channel=self.config.six_channel_aug)
@@ -104,7 +109,7 @@ class Learner:
         model = torch.nn.DataParallel(model, device_ids=self.config.device_ids)
 
         ds, ds_val, ds_test = get_dataset(self.config.use_rgb, size=self.config.pic_size, pair=True,
-                                          six_channel=self.config.six_channel_aug)
+                                          six_channel=self.config.six_channel_aug, experment=self.config.experment)
         loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16, drop_last=True)
         val_loader = D.DataLoader(ds_val, batch_size=self.config.val_batch_size, shuffle=False, num_workers=16,
                                   drop_last=True)
@@ -197,7 +202,7 @@ class Learner:
 
             submission = pd.read_csv('data/test.csv')
             submission['sirna'] = true_idx.astype(int)
-            submission.to_csv('s2_submission.csv', index=False, columns=['id_code', 'sirna'])
+            submission.to_csv(self.config.experment + '_s2_submission.csv', index=False, columns=['id_code', 'sirna'])
 
             test_embeddings = np.concatenate(test_embeddings)
             cosine = np.concatenate(cosine)
@@ -221,7 +226,7 @@ class Learner:
 
         submission = pd.read_csv('data/test.csv')
         submission['sirna'] = true_idx.astype(int)
-        submission.to_csv('submission_angle.csv', index=False, columns=['id_code', 'sirna'])
+        submission.to_csv(self.config.experment + '_submission_angle.csv', index=False, columns=['id_code', 'sirna'])
 
     def confi_evaluate(self, model, avg=False):
 
@@ -571,19 +576,30 @@ def board_val(writer, accuracy, best_threshold, roc_curve_tensor, step):
 if __name__ == "__main__":
     config = Config()
 
-    learner = Learner(config)
-    s1_model = learner.stage_one()
+    # learner = Learner(config)
+    # s1_model = learner.stage_one()
     # s1_model = learner.build_model(
     #     weight_path='models/stage1_Sep03_07-08-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_densenet201_head_arcface_rgb_False_six_channel_aug_False.pth')
-    learner.confi_evaluate(s1_model)
+    # learner.confi_evaluate(s1_model)
 
-    s2_model = learner.stage_two(s1_model)
-    #
+    # s2_model = learner.stage_two(s1_model)
 
-    # s2_model = learner.build_model(
-    #     weight_path='models/stage2_Sep01_07-15-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_theta.pth',
-    #     mode='arcface')
-    #
-    learner.angle_evaluate(s2_model)
-    # learner.data_leak_evaluate_mask()
+    for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
+        config.experment = experment
 
+        learner = Learner(config)
+        # s1_model = learner.stage_one()
+        # s1_model = learner.build_model(
+        #     weight_path='models/stage1_Sep02_02-39-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False.pth')
+        # # learner.confi_evaluate(s1_model)
+        #
+        # s2_model = learner.stage_two(s1_model)
+        #
+
+        s2_model = learner.build_model(
+            weight_path='models/stage2_Sep02_02-39-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_theta.pth',
+            mode='arcface')
+        s2_model = learner.stage_two(s2_model)
+
+        learner.angle_evaluate(s2_model)
+        # learner.data_leak_evaluate_mask()

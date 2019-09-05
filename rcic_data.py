@@ -61,7 +61,21 @@ def val_pair(df_val):
     return val
 
 
-def get_dataset(rgb=True, size=512, pair=False, six_channel=False, train_aug=True, val_aug=False, test_aug=False):
+def get_dataset(rgb=True, size=512, pair=False, six_channel=False, train_aug=True, val_aug=False, test_aug=False,
+                experment='all'):
+    """
+
+    :param rgb:
+    :param size:
+    :param pair:
+    :param six_channel:
+    :param train_aug:
+    :param val_aug:
+    :param test_aug:
+    :param experment: one of the five value['HEPG2', 'HUVEC', 'RPE', 'U2OS','all']
+    :return:
+    """
+
     if rgb:
         rgb_df = pd.read_csv(rgb_train_csv_path)
         df_train, df_val = train_test_split(rgb_df, test_size=0.12, stratify=rgb_df.sirna, random_state=42)
@@ -78,15 +92,23 @@ def get_dataset(rgb=True, size=512, pair=False, six_channel=False, train_aug=Tru
         return ds, ds_val, ds_test
     else:
         rgb_df = pd.read_csv(train_csv_path)
+        if experment != 'all':
+            index = np.array([x.split('-')[0] for x in np.array(rgb_df.experiment)]) == experment
+            rgb_df = rgb_df[index]
+
+
         df_train, df_val = train_test_split(rgb_df, test_size=0.12, stratify=rgb_df.sirna, random_state=42)
         df_test = pd.read_csv(test_csv_path)
         if pair:
             # build same pair for metric in val phase
             df_val = val_pair(df_val)
 
-        ds = ImagesDS(df_train, img_dir, False, mode='train', augmentation=train_aug, size=size, six_channel=six_channel)
-        ds_val = ImagesDS(df_val, img_dir, False, mode='train', augmentation=val_aug, size=size, six_channel=six_channel)
-        ds_test = ImagesDS(df_test, img_dir, False, mode='test', augmentation=test_aug, size=size, six_channel=six_channel)
+        ds = ImagesDS(df_train, img_dir, False, mode='train', augmentation=train_aug, size=size,
+                      six_channel=six_channel)
+        ds_val = ImagesDS(df_val, img_dir, False, mode='train', augmentation=val_aug, size=size,
+                          six_channel=six_channel)
+        ds_test = ImagesDS(df_test, img_dir, False, mode='test', augmentation=test_aug, size=size,
+                           six_channel=six_channel)
         return ds, ds_val, ds_test
 
 
@@ -115,41 +137,41 @@ class ImagesDS(D.Dataset):
                 return T.ToTensor()(img)
             else:
                 transfrom = T.Compose([
-                    # T.RandomRotation(90),
-                    # T.RandomHorizontalFlip(0.5),
-                    # T.RandomVerticalFlip(0.5),
+                    T.RandomRotation(90),
+                    T.RandomHorizontalFlip(0.5),
+                    T.RandomVerticalFlip(0.5),
                     trick.RandomErasing(),
                     T.ToTensor()
                 ])
 
-                aug = Compose([
-                    # Resize(height=self.size, width=self.size),
-                    RandomRotate90(),
-                    Flip(),
-                    Transpose(),
-                    OneOf([
-                        IAAAdditiveGaussianNoise(),
-                        GaussNoise(),
-                    ], p=0.2),
-                    OneOf([
-                        MotionBlur(p=.2),
-                        MedianBlur(blur_limit=3, p=0.1),
-                        Blur(blur_limit=3, p=0.1),
-                    ], p=0.2),
-                    ShiftScaleRotate(shift_limit=0.0625, scale_limit=0.2, rotate_limit=45, p=0.2),
-                    OneOf([
-                        OpticalDistortion(p=0.3),
-                        GridDistortion(p=.1),
-                        IAAPiecewiseAffine(p=0.3),
-                    ], p=0.2),
-                    OneOf([
-                        IAASharpen(),
-                        IAAEmboss(),
-                        RandomBrightnessContrast(),
-                    ], p=0.3),
-                ], p=1)
-
-                img = aug(image=np.array(img))['image']
+                # aug = Compose([
+                #     # Resize(height=self.size, width=self.size),
+                #     RandomRotate90(),
+                #     Flip(),
+                #     Transpose(),
+                #     OneOf([
+                #         IAAAdditiveGaussianNoise(),
+                #         GaussNoise(),
+                #     ], p=0.2),
+                #     OneOf([
+                #         MotionBlur(p=.2),
+                #         MedianBlur(blur_limit=3, p=0.1),
+                #         Blur(blur_limit=3, p=0.1),
+                #     ], p=0.2),
+                #     ShiftScaleRotate(shift_limit=0.0625, scale_limit=0.2, rotate_limit=45, p=0.2),
+                #     OneOf([
+                #         OpticalDistortion(p=0.3),
+                #         GridDistortion(p=.1),
+                #         IAAPiecewiseAffine(p=0.3),
+                #     ], p=0.2),
+                #     OneOf([
+                #         IAASharpen(),
+                #         IAAEmboss(),
+                #         RandomBrightnessContrast(),
+                #     ], p=0.3),
+                # ], p=1)
+                #
+                # img = aug(image=np.array(img))['image']
                 return transfrom(img)
 
     def _get_img_path(self, index, channel, site):
