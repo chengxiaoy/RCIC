@@ -43,7 +43,7 @@ class Config():
     pic_size = 448
 
     stage1_epoch = 20
-    stage2_epoch = 5
+    stage2_epoch = 50
 
     stage1_lr = 0.0001
     stage2_lr = 0.0001
