@@ -458,6 +458,7 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
 
     best_model_wts = copy.deepcopy(model.state_dict())
 
+    early_stop = 0
     for epoch in range(num_epochs):
 
         # if epoch == 0:
@@ -542,8 +543,9 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
                                 epoch)
                 print('{} Loss: {:.4f} '.format(phase, epoch_loss))
                 print('{} theta Acc: {:.4f}'.format(phase, epoch_acc))
-
+                early_stop += 1
                 if epoch_acc > max_theta_acc:
+                    early_stop = 0
                     max_theta_acc = epoch_acc
                     torch.save(model.state_dict(), 'models/' + model_name + "_theta.pth")
                     best_model_wts = copy.deepcopy(model.state_dict())
@@ -562,7 +564,12 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
                 #     torch.save(model.state_dict(), 'models/' + name + ".pth")
                 #     best_model_wts = copy.deepcopy(model.state_dict())
 
+
+
                 scheduler.step(epoch_acc)
+
+        if early_stop > 10:
+            break
 
     model.load_state_dict(best_model_wts)
     return model
