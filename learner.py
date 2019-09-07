@@ -564,8 +564,6 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
                 #     torch.save(model.state_dict(), 'models/' + name + ".pth")
                 #     best_model_wts = copy.deepcopy(model.state_dict())
 
-
-
                 scheduler.step(epoch_acc)
 
         if early_stop > 10:
@@ -584,25 +582,25 @@ def board_val(writer, accuracy, best_threshold, roc_curve_tensor, step):
 def merge_submission():
     sub = pd.read_csv('submission.csv')
     pred = np.array(sub.sirna)
-    full_embedding = []
+    full_embedding = np.array(len(sub) * 2, 1108)
     for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
         # for experment in ['HEPG2', 'RPE', 'U2OS']:
         file_name = experment + "_s2_submission.csv"
-        embedding = joblib.load(experment+"_cos.pkl")
-
+        embedding = joblib.load(experment + "_cos.pkl")
 
         sub_df = pd.read_csv(file_name)
         index = np.array([x.split('-')[0] for x in np.array(sub_df.id_code)]) == experment
         pred[index] = np.array(sub_df.sirna)[index]
-        full_embedding.append(embedding[np.concatenate([index,index])])
+        index = np.concatenate([index, index])
+        full_embedding[index] = embedding[index]
 
     sub['sirna'] = pred.astype(int)
     sub.to_csv('s2_submission.csv', index=False, columns=['id_code', 'sirna'])
-    joblib.dump(np.concatenate(full_embedding),'cos.pkl')
+    joblib.dump(full_embedding, 'cos.pkl')
 
 
 if __name__ == "__main__":
-    # merge_submission()
+    merge_submission()
 
     config = Config()
 
