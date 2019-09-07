@@ -602,7 +602,7 @@ def merge_submission():
 
 
 if __name__ == "__main__":
-    merge_submission()
+    # merge_submission()
 
     config = Config()
 
