@@ -42,10 +42,10 @@ class Config():
     classes = 1108
     pic_size = 448
 
-    stage1_epoch = 20
+    stage1_epoch = 30
     stage2_epoch = 50
 
-    stage1_lr = 0.0001
+    stage1_lr = 0.00001
     stage2_lr = 0.0001
     six_channel_aug = False
     experment = 'all'
@@ -601,18 +601,20 @@ def merge_submission():
 
 
 if __name__ == "__main__":
-    merge_submission()
 
     config = Config()
 
     learner = Learner(config)
-    learner.data_leak_evaluate_mask()
-    # s1_model = learner.stage_one()
+    # merge_submission()
+    #
+
+    # learner.data_leak_evaluate_mask()
+    s1_model = learner.stage_one()
     # s1_model = learner.build_model(
     #     weight_path='models/stage1_Sep03_07-08-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_densenet201_head_arcface_rgb_False_six_channel_aug_False.pth')
     # learner.confi_evaluate(s1_model)
 
-    # s2_model = learner.stage_two(s1_model)
+    s2_model = learner.stage_two(s1_model)
 
     # for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
     #     config.experment = experment
