@@ -592,6 +592,7 @@ def merge_submission():
         index = np.array([x.split('-')[0] for x in np.array(sub_df.id_code)]) == experment
         pred[index] = np.array(sub_df.sirna)[index]
         index = np.concatenate([index, index])
+        print(index)
         full_embedding[index] = embedding[index]
 
     sub['sirna'] = pred.astype(int)
