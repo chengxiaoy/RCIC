@@ -584,21 +584,30 @@ def board_val(writer, accuracy, best_threshold, roc_curve_tensor, step):
 def merge_submission():
     sub = pd.read_csv('submission.csv')
     pred = np.array(sub.sirna)
+    full_embedding = []
     for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
         # for experment in ['HEPG2', 'RPE', 'U2OS']:
         file_name = experment + "_s2_submission.csv"
+        embedding = joblib.load(experment+"_cos.pkl")
+
+
         sub_df = pd.read_csv(file_name)
         index = np.array([x.split('-')[0] for x in np.array(sub_df.id_code)]) == experment
         pred[index] = np.array(sub_df.sirna)[index]
+        full_embedding.append(embedding[index])
+
     sub['sirna'] = pred.astype(int)
     sub.to_csv('s2_submission.csv', index=False, columns=['id_code', 'sirna'])
+    joblib.dump(np.concatenate(full_embedding),'cos.pkl')
 
 
 if __name__ == "__main__":
-    # merge_submission()
+    merge_submission()
+
     config = Config()
 
-    # learner = Learner(config)
+    learner = Learner(config)
+    learner.data_leak_evaluate_mask()
     # s1_model = learner.stage_one()
     # s1_model = learner.build_model(
     #     weight_path='models/stage1_Sep03_07-08-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_densenet201_head_arcface_rgb_False_six_channel_aug_False.pth')
