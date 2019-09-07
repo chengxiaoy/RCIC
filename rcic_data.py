@@ -139,41 +139,41 @@ class ImagesDS(D.Dataset):
                 return T.ToTensor()(img)
             else:
                 transfrom = T.Compose([
-                    # T.RandomRotation(90),
-                    # T.RandomHorizontalFlip(0.5),
-                    # T.RandomVerticalFlip(0.5),
+                    T.RandomRotation(90),
+                    T.RandomHorizontalFlip(0.5),
+                    T.RandomVerticalFlip(0.5),
                     trick.RandomErasing(),
                     T.ToTensor()
                 ])
 
-                aug = Compose([
-                    # Resize(height=self.size, width=self.size),
-                    RandomRotate90(),
-                    Flip(),
-                    Transpose(),
-                    OneOf([
-                        IAAAdditiveGaussianNoise(),
-                        GaussNoise(),
-                    ], p=0.2),
-                    OneOf([
-                        MotionBlur(p=.2),
-                        MedianBlur(blur_limit=3, p=0.1),
-                        Blur(blur_limit=3, p=0.1),
-                    ], p=0.2),
-                    ShiftScaleRotate(shift_limit=0.0625, scale_limit=0.2, rotate_limit=45, p=0.2),
-                    OneOf([
-                        OpticalDistortion(p=0.3),
-                        GridDistortion(p=.1),
-                        IAAPiecewiseAffine(p=0.3),
-                    ], p=0.2),
-                    OneOf([
-                        IAASharpen(),
-                        IAAEmboss(),
-                        RandomBrightnessContrast(),
-                    ], p=0.3),
-                ], p=1)
-
-                img = aug(image=np.array(img))['image']
+                # aug = Compose([
+                #     # Resize(height=self.size, width=self.size),
+                #     RandomRotate90(),
+                #     Flip(),
+                #     Transpose(),
+                #     OneOf([
+                #         IAAAdditiveGaussianNoise(),
+                #         GaussNoise(),
+                #     ], p=0.2),
+                #     OneOf([
+                #         MotionBlur(p=.2),
+                #         MedianBlur(blur_limit=3, p=0.1),
+                #         Blur(blur_limit=3, p=0.1),
+                #     ], p=0.2),
+                #     ShiftScaleRotate(shift_limit=0.0625, scale_limit=0.2, rotate_limit=45, p=0.2),
+                #     OneOf([
+                #         OpticalDistortion(p=0.3),
+                #         GridDistortion(p=.1),
+                #         IAAPiecewiseAffine(p=0.3),
+                #     ], p=0.2),
+                #     OneOf([
+                #         IAASharpen(),
+                #         IAAEmboss(),
+                #         RandomBrightnessContrast(),
+                #     ], p=0.3),
+                # ], p=1)
+                #
+                # img = aug(image=np.array(img))['image']
                 return transfrom(img)
 
     def _get_img_path(self, index, channel, site):
