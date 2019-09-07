@@ -594,7 +594,7 @@ def merge_submission():
         sub_df = pd.read_csv(file_name)
         index = np.array([x.split('-')[0] for x in np.array(sub_df.id_code)]) == experment
         pred[index] = np.array(sub_df.sirna)[index]
-        full_embedding.append(embedding[index])
+        full_embedding.append(embedding[np.concatenate([index,index])])
 
     sub['sirna'] = pred.astype(int)
     sub.to_csv('s2_submission.csv', index=False, columns=['id_code', 'sirna'])
