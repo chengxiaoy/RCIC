@@ -582,7 +582,7 @@ def board_val(writer, accuracy, best_threshold, roc_curve_tensor, step):
 def merge_submission():
     sub = pd.read_csv('submission.csv')
     pred = np.array(sub.sirna)
-    full_embedding = np.array((len(sub) * 2, 1108))
+    full_embedding = np.array((39794, 1108))
     for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
         # for experment in ['HEPG2', 'RPE', 'U2OS']:
         file_name = experment + "_s2_submission.csv"
