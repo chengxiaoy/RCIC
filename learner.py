@@ -42,10 +42,10 @@ class Config():
     classes = 1108
     pic_size = 448
 
-    stage1_epoch = 30
+    stage1_epoch = 50
     stage2_epoch = 50
 
-    stage1_lr = 0.00001
+    stage1_lr = 0.0001
     stage2_lr = 0.0001
     six_channel_aug = False
     experment = 'all'
@@ -356,7 +356,7 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
     best_model_wts = copy.deepcopy(model.state_dict())
     min_loss = float('inf')
     max_acc = 0.0
-
+    early_stop = 0
     for epoch in range(num_epochs):
 
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
@@ -429,8 +429,10 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
             writer.add_text('Text', '{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss[phase], epoch_acc[phase]),
                             epoch)
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss[phase], epoch_acc[phase]))
-
+            if phase == 'val':
+                early_stop += 1
             if phase == 'val' and epoch_acc[phase] > max_acc:
+                early_stop = 0
                 max_acc = epoch_acc[phase]
                 best_model_wts = copy.deepcopy(model.state_dict())
                 torch.save(model.state_dict(), "models/" + name + ".pth")
@@ -438,6 +440,9 @@ def train_model(model, criterion, optimizer, scheduler, dataloaders, writer, num
         writer.add_scalars('data/loss', {'train': epoch_loss['train'], 'val': epoch_loss['val']}, epoch)
         writer.add_scalars('data/acc', {'train': epoch_acc['train'], 'val': epoch_acc['val']}, epoch)
         scheduler.step(epoch_acc['val'])
+
+        if early_stop > 10:
+            break
 
     time_elapsed = time.time() - since
     print('Training complete in {:.0f}m {:.0f}s'.format(
@@ -603,11 +608,11 @@ if __name__ == "__main__":
 
     config = Config()
 
-    learner = Learner(config)
-    merge_submission()
+    # learner = Learner(config)
+    # merge_submission()
     #
 
-    learner.data_leak_evaluate_mask()
+    # learner.data_leak_evaluate_mask()
     # s1_model = learner.stage_one()
     # s1_model = learner.build_model(
     #     weight_path='models/stage1_Sep03_07-08-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_densenet201_head_arcface_rgb_False_six_channel_aug_False.pth')
@@ -620,18 +625,18 @@ if __name__ == "__main__":
         config.experment = experment
 
         learner = Learner(config)
-        # s1_model = learner.stage_one()
+        s1_model = learner.stage_one()
         # s1_model = learner.build_model(
         #     weight_path='models/stage1_Sep02_02-39-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False.pth')
-        # # learner.confi_evaluate(s1_model)
-        #
-        # s2_model = learner.stage_two(s1_model)
-        #
+        learner.confi_evaluate(s1_model)
 
-        s2_model = learner.build_model(
-            weight_path='models/stage1_Sep02_02-39-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False.pth',
-            mode='arcface')
-        s2_model = learner.stage_two(s2_model)
+        s2_model = learner.stage_two(s1_model)
+
+        #
+        # s2_model = learner.build_model(
+        #     weight_path='models/stage1_Sep02_02-39-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False.pth',
+        #     mode='arcface')
+        # s2_model = learner.stage_two(s2_model)
 
         learner.angle_evaluate(s2_model)
         # learner.data_leak_evaluate_mask()
