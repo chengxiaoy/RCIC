@@ -47,7 +47,7 @@ class Config():
 
     stage1_lr = 0.0001
     stage2_lr = 0.0001
-    six_channel_aug = False
+    six_channel_aug = True
     experment = 'all'
 
     def __repr__(self):
