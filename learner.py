@@ -283,7 +283,7 @@ class Learner:
     def data_leak_evaluate_mask(self):
         train_csv = pd.read_csv('./data/train.csv')
         test_csv = pd.read_csv('./data/test.csv')
-        sub = pd.read_csv("s2_submission.csv")
+        sub = pd.read_csv("dl_submission.csv")
 
         plate_groups = np.zeros((1108, 4), int)
         for sirna in range(1108):
@@ -608,11 +608,11 @@ if __name__ == "__main__":
     config = Config()
     learner = Learner(config)
 
-    # merge_submission()
+    merge_submission()
     #
 
-    # learner.data_leak_evaluate_mask()
-    s1_model = learner.stage_one()
+    learner.data_leak_evaluate_mask()
+    # s1_model = learner.stage_one()
     # s1_model = learner.build_model(
     #     weight_path='models/stage1_Sep03_07-08-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_densenet201_head_arcface_rgb_False_six_channel_aug_False.pth')
     # learner.confi_evaluate(s1_model)
@@ -620,22 +620,22 @@ if __name__ == "__main__":
     # s2_model = learner.stage_two(s1_model)
 
     # for experment in ['U2OS']:
-    for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
-        config.experment = experment
-
-        learner = Learner(config)
-        # s1_model = learner.stage_one()
-        # s1_model = learner.build_model(
-        #     weight_path='models/stage1_Sep02_02-39-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False.pth')
-        # learner.confi_evaluate(s1_model)
-
-        s2_model = learner.stage_two(s1_model)
-
-        #
-        # s2_model = learner.build_model(
-        #     weight_path='models/stage1_Sep02_02-39-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False.pth',
-        #     mode='arcface')
-        # s2_model = learner.stage_two(s2_model)
-
-        learner.angle_evaluate(s2_model)
-        # learner.data_leak_evaluate_mask()
+    # for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
+    #     config.experment = experment
+    #
+    #     learner = Learner(config)
+    #     # s1_model = learner.stage_one()
+    #     # s1_model = learner.build_model(
+    #     #     weight_path='models/stage1_Sep02_02-39-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False.pth')
+    #     # learner.confi_evaluate(s1_model)
+    #
+    #     s2_model = learner.stage_two(s1_model)
+    #
+    #     #
+    #     # s2_model = learner.build_model(
+    #     #     weight_path='models/stage1_Sep02_02-39-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False.pth',
+    #     #     mode='arcface')
+    #     # s2_model = learner.stage_two(s2_model)
+    #
+    #     learner.angle_evaluate(s2_model)
+    #     # learner.data_leak_evaluate_mask()
