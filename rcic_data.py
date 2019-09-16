@@ -90,7 +90,7 @@ class ImagesDS(D.Dataset):
                     T.RandomRotation(90),
                     T.RandomHorizontalFlip(0.5),
                     T.RandomVerticalFlip(0.5),
-                    # trick.RandomErasing(),
+                    trick.RandomErasing(),
                     T.ToTensor()
                 ])
 
