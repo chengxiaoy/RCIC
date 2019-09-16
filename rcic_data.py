@@ -57,11 +57,11 @@ def get_dataset(size=512, six_channel=False, train_aug=True, val_aug=False, test
         index = np.array([x.split('-')[0] for x in np.array(df_val.id_code)]) == experment
         df_val = df_val.iloc[index]
 
-    ds = ImagesDS(df_train, img_dir, False, mode='train', augmentation=train_aug, size=size,
+    ds = ImagesDS(df_train, img_dir,  mode='train', augmentation=train_aug, size=size,
                   six_channel=six_channel)
-    ds_val = ImagesDS(df_val, img_dir, False, mode='train', augmentation=val_aug, size=size,
+    ds_val = ImagesDS(df_val, img_dir, mode='train', augmentation=val_aug, size=size,
                       six_channel=six_channel)
-    ds_test = ImagesDS(df_test, img_dir, False, mode='test', augmentation=test_aug, size=size,
+    ds_test = ImagesDS(df_test, img_dir, mode='test', augmentation=test_aug, size=size,
                        six_channel=six_channel)
     return ds, ds_val, ds_test
 
