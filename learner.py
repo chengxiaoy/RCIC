@@ -36,6 +36,7 @@ class Config():
     test_batch_size = 32 * 7
 
     device_ids = [0, 1]
+    use_rgb = False
     backbone = 'resnet_50'
     head_type = 'arcface'
     classes = 1108
