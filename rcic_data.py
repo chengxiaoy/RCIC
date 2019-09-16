@@ -87,10 +87,10 @@ class ImagesDS(D.Dataset):
                 return T.ToTensor()(img)
             else:
                 transfrom = T.Compose([
-                    trick.RandomErasing(),
                     T.RandomRotation(90),
                     T.RandomHorizontalFlip(0.5),
                     T.RandomVerticalFlip(0.5),
+                    # trick.RandomErasing(),
                     T.ToTensor()
                 ])
 
