@@ -622,10 +622,10 @@ if __name__ == "__main__":
         config.six_channel_aug = True
         learner = Learner(config)
         file_paths = {
-            'HEPG2': 'stage2_Sep10_20-38-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_HEPG2_theta.pth',
-            'HUVEC': 'stage2_Sep10_23-22-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_HUVEC_theta.pth',
-            'RPE': 'stage2_Sep11_05-47-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_RPE_theta.pth',
-            'U2OS': 'stage2_Sep11_08-29-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_U2OS_theta.pth'}
+            'HEPG2': 'models/stage2_Sep10_20-38-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_HEPG2_theta.pth',
+            'HUVEC': 'models/stage2_Sep10_23-22-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_HUVEC_theta.pth',
+            'RPE': 'models/stage2_Sep11_05-47-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_RPE_theta.pth',
+            'U2OS': 'models/stage2_Sep11_08-29-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_U2OS_theta.pth'}
 
         # s1_model = learner.stage_one()
         # s1_model = learner.build_model(
