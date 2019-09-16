@@ -619,7 +619,7 @@ if __name__ == "__main__":
     # for experment in ['U2OS']:
     for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
         config.experment = experment
-        config.six_channel_aug = False
+        config.six_channel_aug = True
         learner = Learner(config)
         # s1_model = learner.stage_one()
         s1_model = learner.build_model(
