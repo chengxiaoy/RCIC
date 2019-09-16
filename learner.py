@@ -137,41 +137,41 @@ class Learner:
 
         model.eval()
         with torch.no_grad():
-            for i, (input, target) in tqdm(enumerate(loader)):
-                input = input.to(device)
-                target = target.to(device)
-                embedding, cos = model(input, target)
-                embedding = embedding.cpu().numpy()
-                cos = cos.cpu().numpy()
-                train_embeddings.append(embedding)
-                train_labels.append(target.cpu().numpy())
-
-            for i, (input, target) in tqdm(enumerate(val_loader)):
-                input = input.to(device)
-                target = target.to(device)
-                embedding, cos = model(input, target)
-                embedding = embedding.cpu().numpy()
-                cos = cos.cpu().numpy()
-                train_embeddings.append(embedding)
-                train_labels.append(target.cpu().numpy())
-
-            train_embeddings = np.concatenate(train_embeddings)
-            train_labels = np.concatenate(train_labels)
-
-            train_labels = np.array(train_labels)
-            train_embeddings = np.array(train_embeddings)
-
-            center_features = []
-            for i in range(1108):
-                index = train_labels == i
-                center_feature = np.mean(train_embeddings[index], axis=0)
-                center_features.append(center_feature)
-
-            center_features = np.array(center_features)
-
-            joblib.dump(train_embeddings, "train_embeddings.pkl")
-            joblib.dump(train_labels, 'train_labels.pkl')
-            joblib.dump(center_features, 'center_features.pkl')
+            # for i, (input, target) in tqdm(enumerate(loader)):
+            #     input = input.to(device)
+            #     target = target.to(device)
+            #     embedding, cos = model(input, target)
+            #     embedding = embedding.cpu().numpy()
+            #     cos = cos.cpu().numpy()
+            #     train_embeddings.append(embedding)
+            #     train_labels.append(target.cpu().numpy())
+            #
+            # for i, (input, target) in tqdm(enumerate(val_loader)):
+            #     input = input.to(device)
+            #     target = target.to(device)
+            #     embedding, cos = model(input, target)
+            #     embedding = embedding.cpu().numpy()
+            #     cos = cos.cpu().numpy()
+            #     train_embeddings.append(embedding)
+            #     train_labels.append(target.cpu().numpy())
+            #
+            # train_embeddings = np.concatenate(train_embeddings)
+            # train_labels = np.concatenate(train_labels)
+            #
+            # train_labels = np.array(train_labels)
+            # train_embeddings = np.array(train_embeddings)
+            #
+            # center_features = []
+            # for i in range(1108):
+            #     index = train_labels == i
+            #     center_feature = np.mean(train_embeddings[index], axis=0)
+            #     center_features.append(center_feature)
+            #
+            # center_features = np.array(center_features)
+            #
+            # joblib.dump(train_embeddings, "train_embeddings.pkl")
+            # joblib.dump(train_labels, 'train_labels.pkl')
+            # joblib.dump(center_features, 'center_features.pkl')
 
             test_embeddings = []
             cosine = []
@@ -209,22 +209,22 @@ class Learner:
             joblib.dump(test_embeddings, 'test_embeddings.pkl')
 
             assert len(test_embeddings) == 19897 * 2
-            from sklearn.metrics.pairwise import cosine_similarity
-
-            similarity = cosine_similarity(test_embeddings, center_features)
-            confi = similarity.max(axis=1)
-            preds = similarity.argmax(axis=1)
-
-            true_idx = np.empty(0)
-            for i in range(19897):
-                if confi[i] > confi[i + 19897]:
-                    true_idx = np.append(true_idx, preds[i])
-                else:
-                    true_idx = np.append(true_idx, preds[i + 19897])
-
-        submission = pd.read_csv('data/test.csv')
-        submission['sirna'] = true_idx.astype(int)
-        submission.to_csv(self.config.experment + '_submission_angle.csv', index=False, columns=['id_code', 'sirna'])
+        #     from sklearn.metrics.pairwise import cosine_similarity
+        #
+        #     similarity = cosine_similarity(test_embeddings, center_features)
+        #     confi = similarity.max(axis=1)
+        #     preds = similarity.argmax(axis=1)
+        #
+        #     true_idx = np.empty(0)
+        #     for i in range(19897):
+        #         if confi[i] > confi[i + 19897]:
+        #             true_idx = np.append(true_idx, preds[i])
+        #         else:
+        #             true_idx = np.append(true_idx, preds[i + 19897])
+        #
+        # submission = pd.read_csv('data/test.csv')
+        # submission['sirna'] = true_idx.astype(int)
+        # submission.to_csv(self.config.experment + '_submission_angle.csv', index=False, columns=['id_code', 'sirna'])
 
     def confi_evaluate(self, model, avg=False):
 
@@ -605,7 +605,6 @@ def merge_submission():
 
 if __name__ == "__main__":
 
-    config = Config()
     # learner = Learner(config)
     # merge_submission()
     # learner.data_leak_evaluate_mask()
@@ -618,15 +617,21 @@ if __name__ == "__main__":
 
     # for experment in ['U2OS']:
     for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
+        config = Config()
         config.experment = experment
         config.six_channel_aug = True
         learner = Learner(config)
+        file_paths = {
+            'HEPG2': 'stage2_Sep10_20-38-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_HEPG2_theta.pth',
+            'HUVEC': 'stage2_Sep10_23-22-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_HUVEC_theta.pth',
+            'RPE': 'stage2_Sep11_05-47-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_RPE_theta.pth',
+            'U2OS': 'stage2_Sep11_08-29-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_U2OS_theta.pth'}
+
         # s1_model = learner.stage_one()
-        s1_model = learner.build_model(
-            weight_path='models/stage1_Sep02_02-39-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False.pth')
-        # learner.confi_evaluate(s1_model)
-
-        s2_model = learner.stage_two(s1_model)
-
+        # s1_model = learner.build_model(
+        #     weight_path='models/stage1_Sep02_02-39-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False.pth',
+        #     )
+        # s2_model = learner.stage_two(s1_model)
+        s2_model = learner.build_model(weight_path=file_paths[experment], mode='arcface')
 
         learner.angle_evaluate(s2_model)
