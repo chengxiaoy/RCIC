@@ -592,15 +592,16 @@ def evaluate(model, vloader):
     preds = np.empty(0)
     confi = np.empty(0)
     targets = []
-    for i, (input, target) in tqdm(enumerate(vloader)):
-        input = input.to(device)
-        targets.append(target.cpu().numpy())
-        embedding, cos = model(input, target)
+    with torch.no_grad():
+        for i, (input, target) in tqdm(enumerate(vloader)):
+            input = input.to(device)
+            targets.append(target.cpu().numpy())
+            embedding, cos = model(input, target)
 
-        idx = cos.max(dim=-1)[1].cpu().numpy()
-        confidence = cos.max(dim=-1)[0].cpu().numpy()
-        preds = np.append(preds, idx, axis=0)
-        confi = np.append(confi, confidence, axis=0)
+            idx = cos.max(dim=-1)[1].cpu().numpy()
+            confidence = cos.max(dim=-1)[0].cpu().numpy()
+            preds = np.append(preds, idx, axis=0)
+            confi = np.append(confi, confidence, axis=0)
 
     true_idx = np.empty(0)
     for i in range(19897):
