@@ -659,7 +659,7 @@ if __name__ == "__main__":
         #     weight_path='models/stage1_Sep02_02-39-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False.pth',
         #     )
         # s2_model = learner.stage_two(s1_model)
-        s2_model = learner.build_model(weight_path=file_paths2[experment], mode='arcface')
+        s2_model = learner.build_model(weight_path=file_paths[experment], mode='arcface')
 
         ds, ds_val, ds_test = get_dataset(size=config.pic_size,
                                           six_channel=config.six_channel_aug,experment = config.experment)
