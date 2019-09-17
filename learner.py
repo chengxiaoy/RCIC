@@ -663,7 +663,7 @@ if __name__ == "__main__":
         ds, ds_val, ds_test = get_dataset(size=config.pic_size,
                                           six_channel=config.six_channel_aug,experment = config.experment)
 
-        tloader = D.DataLoader(ds_test, batch_size=config.test_batch_size, shuffle=False, num_workers=16)
+        tloader = D.DataLoader(ds_val, batch_size=config.test_batch_size, shuffle=False, num_workers=16)
         print(evaluate(s2_model, tloader))
 
 
