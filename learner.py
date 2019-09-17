@@ -615,7 +615,7 @@ def evaluate(model, vloader):
             true_idx = np.append(true_idx, preds[i + half_count])
 
     targets = np.concatenate(targets)
-    assert len(targets) * 2 == len(targets)
+    assert len(true_idx) * 2 == len(targets)
     for i, j in zip(true_idx, targets):
         if i == j:
             running_corrects += 1
