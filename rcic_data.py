@@ -133,7 +133,6 @@ class ImagesDS(D.Dataset):
 
     def six_channel_transform(self, arr, augment=False):
         if augment:
-            print("====fucking albumentations====")
             aug = Compose([
                 Resize(height=self.size, width=self.size),
                 RandomRotate90(),
@@ -161,8 +160,6 @@ class ImagesDS(D.Dataset):
                 ], p=0.3),
             ], p=1)
         else:
-            print("====no fucking albumentations====")
-
             aug = Compose([
                 Resize(height=self.size, width=self.size),
             ], p=1)
