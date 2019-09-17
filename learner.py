@@ -538,9 +538,11 @@ def train_model_s2(model, criterion, optimizer, scheduler, dataloaders, writer, 
                                 if i[0] == j[0]:
                                     running_corrects += 1
                 epoch_loss = running_loss / len(dataloaders[phase])
-                writer.add_scalar('val/loss', epoch_loss, epoch)
                 epoch_acc = running_corrects / (
                         len(dataloaders[phase]) * config.train_batch_size)
+
+                writer.add_scalar('val/loss', epoch_loss, epoch)
+
                 writer.add_scalar('val/acc', epoch_acc, epoch)
                 writer.add_text('Text', '{} Loss: {:.4f} '.format(phase, epoch_loss),
                                 epoch)
@@ -580,6 +582,27 @@ def board_val(writer, accuracy, best_threshold, roc_curve_tensor, step):
     writer.add_scalar('val/metric_acc', accuracy, step)
     writer.add_scalar('best_threshold', best_threshold, step)
     writer.add_image('roc_curve', roc_curve_tensor, step)
+
+
+def evaluate(model, dataloader):
+    running_corrects = 0
+    for i, (input, target) in enumerate(dataloader):
+        input = input.to(device)
+        target = target.to(device)
+        with torch.set_grad_enabled(False):
+            embedding, cos = model(input, target)
+            label = torch.max(cos.data, 1)[1]
+
+            for i, j in zip(label, target.data.cpu().numpy()):
+                if len(label.shape) == 1:
+                    if i == j:
+                        running_corrects += 1
+                else:
+                    if i[0] == j[0]:
+                        running_corrects += 1
+    epoch_acc = running_corrects / (
+            len(dataloader) * config.train_batch_size)
+    return epoch_acc
 
 
 def merge_submission():
@@ -636,9 +659,16 @@ if __name__ == "__main__":
         # s2_model = learner.stage_two(s1_model)
         s2_model = learner.build_model(weight_path=file_paths2[experment], mode='arcface')
 
-        learner.angle_evaluate(s2_model)
+        ds, ds_val, ds_test = get_dataset(size=config.pic_size,
+                                          six_channel=config.six_channel_aug)
 
-    config = Config()
-    learner = Learner(config)
-    merge_submission()
-    learner.data_leak_evaluate_mask()
+        tloader = D.DataLoader(ds_test, batch_size=config.test_batch_size, shuffle=False, num_workers=16)
+        print(evaluate(s2_model, tloader))
+
+
+        # learner.angle_evaluate(s2_model)
+
+    # config = Config()
+    # learner = Learner(config)
+    # merge_submission()
+    # learner.data_leak_evaluate_mask()
