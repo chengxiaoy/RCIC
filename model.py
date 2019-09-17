@@ -99,7 +99,7 @@ def get_backbone(model_name, use_rgb, classes=1108, pretrained=True):
     if use_rgb:
         return model
     else:
-        if model_name.startswith('resnet'):
+        if model_name.startswith('res'):
             trained_kernel = model.conv1.weight
             new_conv = nn.Conv2d(6, 64, kernel_size=7, stride=2, padding=3, bias=False)
             with torch.no_grad():
