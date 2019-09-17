@@ -30,7 +30,7 @@ class My_Model(Module):
         self.pre_process = nn.BatchNorm2d(6)
         self.backbone = backbone
 
-        if model_name.startswith('resnet'):
+        if model_name.startswith('res'):
             self.num_ftrs = backbone.fc.in_features
             backbone.fc = Identity()
         elif model_name.startswith('dense'):
