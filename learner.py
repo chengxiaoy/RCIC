@@ -584,26 +584,39 @@ def board_val(writer, accuracy, best_threshold, roc_curve_tensor, step):
     writer.add_image('roc_curve', roc_curve_tensor, step)
 
 
-def evaluate(model, dataloader):
-    print(len(dataloader))
+def evaluate(model, vloader):
+    print(len(vloader))
     model.eval()
     running_corrects = 0
-    for i, (input, target) in enumerate(dataloader):
-        input = input.to(device)
-        target = target.to(device)
-        with torch.set_grad_enabled(False):
-            embedding, cos = model(input, target)
-            label = torch.max(cos.data, 1)[1]
 
-            for i, j in zip(label, target.data.cpu().numpy()):
-                if len(label.shape) == 1:
-                    if i == j:
-                        running_corrects += 1
-                else:
-                    if i[0] == j[0]:
-                        running_corrects += 1
+    preds = np.empty(0)
+    confi = np.empty(0)
+    targets = []
+    for i, (input, target) in tqdm(enumerate(vloader)):
+        input = input.to(device)
+        targets.append(target.cpu().numpy())
+        embedding, cos = model(input, target)
+
+        idx = cos.max(dim=-1)[1].cpu().numpy()
+        confidence = cos.max(dim=-1)[0].cpu().numpy()
+        preds = np.append(preds, idx, axis=0)
+        confi = np.append(confi, confidence, axis=0)
+
+    true_idx = np.empty(0)
+    for i in range(19897):
+        if confi[i] > confi[i + 19897]:
+            true_idx = np.append(true_idx, preds[i])
+        else:
+            true_idx = np.append(true_idx, preds[i + 19897])
+
+    targets = np.concatenate(targets)
+    assert len(targets) * 2 == len(targets)
+    for i, j in zip(true_idx, targets):
+        if i == j:
+            running_corrects += 1
+
     epoch_acc = running_corrects / (
-            len(dataloader) * config.train_batch_size)
+            len(vloader) * config.val_batch_size)
     return epoch_acc
 
 
@@ -662,11 +675,10 @@ if __name__ == "__main__":
         s2_model = learner.build_model(weight_path=file_paths[experment], mode='arcface')
 
         ds, ds_val, ds_test = get_dataset(size=config.pic_size,
-                                          six_channel=config.six_channel_aug,experment = config.experment)
+                                          six_channel=config.six_channel_aug, experment=config.experment)
 
-        tloader = D.DataLoader(ds_val, batch_size=config.test_batch_size, shuffle=False, num_workers=16)
-        print(evaluate(s2_model, tloader))
-
+        vloader = D.DataLoader(ds_val, batch_size=config.test_batch_size, shuffle=False, num_workers=16)
+        print(evaluate(s2_model, vloader))
 
         # learner.angle_evaluate(s2_model)
 
