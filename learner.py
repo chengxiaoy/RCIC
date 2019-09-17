@@ -585,10 +585,10 @@ def board_val(writer, accuracy, best_threshold, roc_curve_tensor, step):
 
 
 def evaluate(model, dataloader):
+    model.eval()
     running_corrects = 0
     for i, (input, target) in enumerate(dataloader):
         input = input.to(device)
-        print(target)
         target = target.to(device)
         with torch.set_grad_enabled(False):
             embedding, cos = model(input, target)
