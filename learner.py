@@ -660,7 +660,7 @@ if __name__ == "__main__":
         s2_model = learner.build_model(weight_path=file_paths2[experment], mode='arcface')
 
         ds, ds_val, ds_test = get_dataset(size=config.pic_size,
-                                          six_channel=config.six_channel_aug)
+                                          six_channel=config.six_channel_aug,experment = config.experment)
 
         tloader = D.DataLoader(ds_test, batch_size=config.test_batch_size, shuffle=False, num_workers=16)
         print(evaluate(s2_model, tloader))
