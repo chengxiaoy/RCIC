@@ -630,13 +630,14 @@ def inference(model_path_dict):
         config.experment = experment
         config.six_channel_aug = False
         learner = Learner(config)
-
         model = learner.build_model(weight_path=model_path_dict[experment], mode='arcface')
 
         ds, ds_val, ds_test = get_dataset(size=config.pic_size,
                                           six_channel=config.six_channel_aug, experment=config.experment)
-
         tloader = D.DataLoader(ds_test, batch_size=config.test_batch_size, shuffle=False, num_workers=16)
+
+        preds = np.empty(0)
+        confi = np.empty(0)
         count = 0
         model.eval()
         with torch.no_grad():
