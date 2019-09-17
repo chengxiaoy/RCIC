@@ -585,6 +585,7 @@ def board_val(writer, accuracy, best_threshold, roc_curve_tensor, step):
 
 
 def evaluate(model, dataloader):
+    print(len(dataloader))
     model.eval()
     running_corrects = 0
     for i, (input, target) in enumerate(dataloader):
