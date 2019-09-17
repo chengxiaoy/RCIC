@@ -592,8 +592,10 @@ def evaluate(model, vloader):
     preds = np.empty(0)
     confi = np.empty(0)
     targets = []
+    count = 0
     with torch.no_grad():
         for i, (input, target) in tqdm(enumerate(vloader)):
+            count += len(input)
             input = input.to(device)
             targets.append(target.cpu().numpy())
             embedding, cos = model(input, target)
@@ -604,11 +606,13 @@ def evaluate(model, vloader):
             confi = np.append(confi, confidence, axis=0)
 
     true_idx = np.empty(0)
-    for i in range(19897):
-        if confi[i] > confi[i + 19897]:
+    print(count)
+    half_count = count//2
+    for i in range(half_count):
+        if confi[i] > confi[i + half_count]:
             true_idx = np.append(true_idx, preds[i])
         else:
-            true_idx = np.append(true_idx, preds[i + 19897])
+            true_idx = np.append(true_idx, preds[i + half_count])
 
     targets = np.concatenate(targets)
     assert len(targets) * 2 == len(targets)
