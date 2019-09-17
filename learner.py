@@ -588,6 +588,7 @@ def evaluate(model, dataloader):
     running_corrects = 0
     for i, (input, target) in enumerate(dataloader):
         input = input.to(device)
+        print(target)
         target = target.to(device)
         with torch.set_grad_enabled(False):
             embedding, cos = model(input, target)
