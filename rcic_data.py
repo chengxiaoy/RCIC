@@ -57,6 +57,9 @@ def get_dataset(size=512, six_channel=False, train_aug=True, val_aug=False, test
         index = np.array([x.split('-')[0] for x in np.array(df_val.id_code)]) == experment
         df_val = df_val.iloc[index]
 
+        index = np.array([x.split('-')[0] for x in np.array(df_test.id_code)]) == experment
+        df_test = df_test.iloc[index]
+
     ds = ImagesDS(df_train, img_dir,  mode='train', augmentation=train_aug, size=size,
                   six_channel=six_channel)
     ds_val = ImagesDS(df_val, img_dir, mode='train', augmentation=val_aug, size=size,

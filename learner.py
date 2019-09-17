@@ -585,7 +585,6 @@ def board_val(writer, accuracy, best_threshold, roc_curve_tensor, step):
 
 
 def evaluate(model, vloader):
-    print(len(vloader))
     model.eval()
     running_corrects = 0
 
@@ -607,7 +606,7 @@ def evaluate(model, vloader):
 
     true_idx = np.empty(0)
     print(count)
-    half_count = count//2
+    half_count = count // 2
     for i in range(half_count):
         if confi[i] > confi[i + half_count]:
             true_idx = np.append(true_idx, preds[i])
@@ -621,8 +620,53 @@ def evaluate(model, vloader):
             running_corrects += 1
 
     epoch_acc = running_corrects / (
-            len(vloader) * config.val_batch_size)
+            len(vloader) * 32)
     return epoch_acc
+
+
+def inference(model_path_dict):
+    for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
+        config = Config()
+        config.experment = experment
+        config.six_channel_aug = False
+        learner = Learner(config)
+
+        model = learner.build_model(weight_path=model_path_dict[experment], mode='arcface')
+
+        ds, ds_val, ds_test = get_dataset(size=config.pic_size,
+                                          six_channel=config.six_channel_aug, experment=config.experment)
+
+        tloader = D.DataLoader(ds_test, batch_size=config.test_batch_size, shuffle=False, num_workers=16)
+        count = 0
+        model.eval()
+        with torch.no_grad():
+            for i, (input, target) in tqdm(enumerate(tloader)):
+                count += len(input)
+                input = input.to(device)
+                embedding, cos = model(input, target)
+                idx = cos.max(dim=-1)[1].cpu().numpy()
+                confidence = cos.max(dim=-1)[0].cpu().numpy()
+                preds = np.append(preds, idx, axis=0)
+                confi = np.append(confi, confidence, axis=0)
+
+        true_idx = np.empty(0)
+        print(count)
+        half_count = count // 2
+        for i in range(half_count):
+            if confi[i] > confi[i + half_count]:
+                true_idx = np.append(true_idx, preds[i])
+            else:
+                true_idx = np.append(true_idx, preds[i + half_count])
+
+        test_csv_path = 'data/test.csv'
+        df_test = pd.read_csv(test_csv_path)
+        index = np.array([x.split('-')[0] for x in np.array(df_test.id_code)]) == experment
+
+        sub = pd.read_csv('dl_submission.csv')
+        pred = np.array(sub.sirna)
+        pred[index] = true_idx
+        sub['sirna'] = pred.astype(int)
+        sub.to_csv('dl_submission.csv', index=False, columns=['id_code', 'sirna'])
 
 
 def merge_submission():
@@ -647,6 +691,15 @@ def merge_submission():
 
 
 if __name__ == "__main__":
+    file_paths = {
+            'HEPG2': 'models/stage2_Sep10_20-38-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_HEPG2_theta.pth',
+            'HUVEC': 'models/stage2_Sep10_23-22-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_HUVEC_theta.pth',
+            'RPE': 'models/stage2_Sep11_05-47-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_RPE_theta.pth',
+            'U2OS': 'models/stage2_Sep11_08-29-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_U2OS_theta.pth'}
+
+    inference(file_paths)
+
+
 
     # s1_model = learner.stage_one()
     # s1_model = learner.build_model(
@@ -655,35 +708,35 @@ if __name__ == "__main__":
     # s2_model = learner.stage_two(s1_model)
 
     # for experment in ['U2OS']:
-    for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
-        config = Config()
-        config.experment = experment
-        config.six_channel_aug = False
-        learner = Learner(config)
-        file_paths = {
-            'HEPG2': 'models/stage2_Sep10_20-38-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_HEPG2_theta.pth',
-            'HUVEC': 'models/stage2_Sep10_23-22-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_HUVEC_theta.pth',
-            'RPE': 'models/stage2_Sep11_05-47-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_RPE_theta.pth',
-            'U2OS': 'models/stage2_Sep11_08-29-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_U2OS_theta.pth'}
-
-        file_paths2 = {
-            'HEPG2': 'models/stage2_Sep12_02-31-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_HEPG2_theta.pth',
-            'HUVEC': 'models/stage2_Sep12_06-09-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_HUVEC_theta.pth',
-            'RPE': 'models/stage2_Sep12_12-27-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_RPE_theta.pth',
-            'U2OS': 'models/stage2_Sep12_14-44-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_U2OS_theta.pth'}
-
-        # s1_model = learner.stage_one()
-        # s1_model = learner.build_model(
-        #     weight_path='models/stage1_Sep02_02-39-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False.pth',
-        #     )
-        # s2_model = learner.stage_two(s1_model)
-        s2_model = learner.build_model(weight_path=file_paths2[experment], mode='arcface')
-
-        ds, ds_val, ds_test = get_dataset(size=config.pic_size,
-                                          six_channel=config.six_channel_aug, experment=config.experment)
-
-        vloader = D.DataLoader(ds_val, batch_size=config.test_batch_size, shuffle=False, num_workers=16)
-        print(evaluate(s2_model, vloader))
+    # for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
+    #     config = Config()
+    #     config.experment = experment
+    #     config.six_channel_aug = False
+    #     learner = Learner(config)
+    #     file_paths = {
+    #         'HEPG2': 'models/stage2_Sep10_20-38-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_HEPG2_theta.pth',
+    #         'HUVEC': 'models/stage2_Sep10_23-22-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_HUVEC_theta.pth',
+    #         'RPE': 'models/stage2_Sep11_05-47-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_RPE_theta.pth',
+    #         'U2OS': 'models/stage2_Sep11_08-29-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_U2OS_theta.pth'}
+    #
+    #     file_paths2 = {
+    #         'HEPG2': 'models/stage2_Sep12_02-31-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_HEPG2_theta.pth',
+    #         'HUVEC': 'models/stage2_Sep12_06-09-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_HUVEC_theta.pth',
+    #         'RPE': 'models/stage2_Sep12_12-27-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_RPE_theta.pth',
+    #         'U2OS': 'models/stage2_Sep12_14-44-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_U2OS_theta.pth'}
+    #
+    #     # s1_model = learner.stage_one()
+    #     # s1_model = learner.build_model(
+    #     #     weight_path='models/stage1_Sep02_02-39-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False.pth',
+    #     #     )
+    #     # s2_model = learner.stage_two(s1_model)
+    #     s2_model = learner.build_model(weight_path=file_paths2[experment], mode='arcface')
+    #
+    #     ds, ds_val, ds_test = get_dataset(size=config.pic_size,
+    #                                       six_channel=config.six_channel_aug, experment=config.experment)
+    #
+    #     vloader = D.DataLoader(ds_val, batch_size=config.test_batch_size, shuffle=False, num_workers=16)
+    #     print(evaluate(s2_model, vloader))
 
         # learner.angle_evaluate(s2_model)
 
