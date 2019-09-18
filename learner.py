@@ -698,10 +698,10 @@ if __name__ == "__main__":
     #         'U2OS': 'models/stage2_Sep11_08-29-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_U2OS_theta.pth'}
     #
     # inference(file_paths)
-    config = Config()
-    learner = Learner(config)
-
-    model = learner.stage_one()
+    # config = Config()
+    # learner = Learner(config)
+    #
+    # model = learner.stage_one()
     # s1_model = learner.build_model(
     #     weight_path='models/stage1_Sep03_07-08-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_densenet201_head_arcface_rgb_False_six_channel_aug_False.pth')
     # learner.confi_evaluate(s1_model)
@@ -728,7 +728,7 @@ if __name__ == "__main__":
         # s1_model = learner.build_model(
         #     weight_path='models/stage1_Sep02_02-39-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False.pth',
         #     )
-        # model = learner.build_model(mode='arcface')
+        model = learner.build_model(weight_path='models/stage1_Sep18_06-34-lr1_1e-05_lr2_0.0001_bs_32_ps_448_backbone_resnext_50_head_arcface_six_channel_aug_True_experment_all.pth',mode='arcface')
         s2_model = learner.stage_two(model)
 
 
