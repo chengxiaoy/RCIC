@@ -175,8 +175,8 @@ class ImagesDS(D.Dataset):
                 [1, 2, 0])
             if self.augmentation:
                 six_channel_img = trick.RandomErasing()(six_channel_img)
-                img = self.six_channel_transform(six_channel_img)
-            img = T.ToTensor()(img)
+                six_channel_img = self.six_channel_transform(six_channel_img)
+            img = T.ToTensor()(six_channel_img)
 
         if self.mode == 'train':
             return img, int(self.records[index].sirna)
