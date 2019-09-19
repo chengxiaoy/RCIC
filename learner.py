@@ -712,8 +712,8 @@ if __name__ == "__main__":
     # learner.confi_evaluate(s1_model)
     # s2_model = learner.stage_two(s1_model)
 
-    # for experment in ['U2OS']:
-    for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
+    for experment in ['RPE', 'U2OS']:
+        # for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
         config = Config()
         config.experment = experment
         learner = Learner(config)
