@@ -629,10 +629,6 @@ def inference(model_path_dict):
         config = Config()
         config.experment = experment
         config.six_channel_aug = False
-        if experment in ['HEPG2', 'HUVEC']:
-            config.backbone = 'resnext_50'
-        else:
-            config.backbone = 'resnet_50'
         learner = Learner(config)
         model = learner.build_model(weight_path=model_path_dict[experment], mode='arcface')
 
