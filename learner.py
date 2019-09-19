@@ -628,7 +628,7 @@ def inference(model_path_dict):
     for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
         config = Config()
         config.experment = experment
-        config.six_channel_aug = True
+        config.six_channel_aug = False
         if experment in ['HEPG2', 'HUVEC']:
             config.backbone = 'resnext_50'
         else:
