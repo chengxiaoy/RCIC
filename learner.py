@@ -696,13 +696,13 @@ def merge_submission():
 
 
 if __name__ == "__main__":
-    file_paths = {
-        'HEPG2': 'models/stage2_Sep18_15-30-lr1_1e-05_lr2_0.0001_bs_32_ps_448_backbone_resnext_50_head_arcface_six_channel_aug_True_experment_HEPG2_theta.pth',
-        'HUVEC': 'models/stage2_Sep18_21-05-lr1_1e-05_lr2_0.0001_bs_32_ps_448_backbone_resnext_50_head_arcface_six_channel_aug_True_experment_HUVEC_theta.pth',
-        'RPE': 'models/stage2_Sep11_05-47-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_RPE_theta.pth',
-        'U2OS': 'models/stage2_Sep11_08-29-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_U2OS_theta.pth'}
-    #
-    inference(file_paths)
+    # file_paths = {
+    #     'HEPG2': 'models/stage2_Sep18_15-30-lr1_1e-05_lr2_0.0001_bs_32_ps_448_backbone_resnext_50_head_arcface_six_channel_aug_True_experment_HEPG2_theta.pth',
+    #     'HUVEC': 'models/stage2_Sep18_21-05-lr1_1e-05_lr2_0.0001_bs_32_ps_448_backbone_resnext_50_head_arcface_six_channel_aug_True_experment_HUVEC_theta.pth',
+    #     'RPE': 'models/stage2_Sep11_05-47-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_RPE_theta.pth',
+    #     'U2OS': 'models/stage2_Sep11_08-29-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_U2OS_theta.pth'}
+    # #
+    # inference(file_paths)
     # config = Config()
     # learner = Learner(config)
     #
@@ -713,28 +713,28 @@ if __name__ == "__main__":
     # s2_model = learner.stage_two(s1_model)
 
     # for experment in ['U2OS']:
-    # for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
-    #     config = Config()
-    #     config.experment = experment
-    #     learner = Learner(config)
-    #     # file_paths = {
-    #     #     'HEPG2': 'models/stage2_Sep10_20-38-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_HEPG2_theta.pth',
-    #     #     'HUVEC': 'models/stage2_Sep10_23-22-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_HUVEC_theta.pth',
-    #     #     'RPE': 'models/stage2_Sep11_05-47-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_RPE_theta.pth',
-    #     #     'U2OS': 'models/stage2_Sep11_08-29-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_U2OS_theta.pth'}
-    #     #
-    #     # file_paths2 = {
-    #     #     'HEPG2': 'models/stage2_Sep12_02-31-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_HEPG2_theta.pth',
-    #     #     'HUVEC': 'models/stage2_Sep12_06-09-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_HUVEC_theta.pth',
-    #     #     'RPE': 'models/stage2_Sep12_12-27-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_RPE_theta.pth',
-    #     #     'U2OS': 'models/stage2_Sep12_14-44-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_U2OS_theta.pth'}
-    #
-    #     # s1_model = learner.stage_one()
-    #     model = learner.build_model(
-    #         weight_path='models/stage1_Sep02_02-39-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False.pth',
-    #     )
-    #     # model = learner.build_model(mode='arcface')
-    #     s2_model = learner.stage_two(model)
+    for experment in ['HEPG2', 'HUVEC', 'RPE', 'U2OS']:
+        config = Config()
+        config.experment = experment
+        learner = Learner(config)
+        # file_paths = {
+        #     'HEPG2': 'models/stage2_Sep10_20-38-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_HEPG2_theta.pth',
+        #     'HUVEC': 'models/stage2_Sep10_23-22-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_HUVEC_theta.pth',
+        #     'RPE': 'models/stage2_Sep11_05-47-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_RPE_theta.pth',
+        #     'U2OS': 'models/stage2_Sep11_08-29-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_True_experment_U2OS_theta.pth'}
+        #
+        # file_paths2 = {
+        #     'HEPG2': 'models/stage2_Sep12_02-31-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_HEPG2_theta.pth',
+        #     'HUVEC': 'models/stage2_Sep12_06-09-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_HUVEC_theta.pth',
+        #     'RPE': 'models/stage2_Sep12_12-27-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_RPE_theta.pth',
+        #     'U2OS': 'models/stage2_Sep12_14-44-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_U2OS_theta.pth'}
+
+        # s1_model = learner.stage_one()
+        model = learner.build_model(
+            weight_path='models/stage1_Sep18_06-34-lr1_1e-05_lr2_0.0001_bs_32_ps_448_backbone_resnext_50_head_arcface_six_channel_aug_True_experment_all.pth',
+        )
+        # model = learner.build_model(mode='arcface')
+        s2_model = learner.stage_two(model)
 
     # learner.angle_evaluate(s2_model)
 

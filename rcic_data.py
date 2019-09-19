@@ -60,7 +60,7 @@ def get_dataset(size=512, six_channel=False, train_aug=True, val_aug=False, test
         index = np.array([x.split('-')[0] for x in np.array(df_test.id_code)]) == experment
         df_test = df_test.iloc[index]
 
-    ds = ImagesDS(df_train, img_dir,  mode='train', augmentation=train_aug, size=size,
+    ds = ImagesDS(df_train, img_dir, mode='train', augmentation=train_aug, size=size,
                   six_channel=six_channel)
     ds_val = ImagesDS(df_val, img_dir, mode='train', augmentation=val_aug, size=size,
                       six_channel=six_channel)
@@ -131,38 +131,35 @@ class ImagesDS(D.Dataset):
         experiment, well, plate = self.records[index].experiment, self.records[index].well, self.records[index].plate
         return '/'.join([self.img_dir, self.mode, experiment, f'Plate{plate}', f'{well}_s{site}_w{channel}.png'])
 
-    def six_channel_transform(self, arr, augment=False):
-        if augment:
-            aug = Compose([
-                Resize(height=self.size, width=self.size),
-                RandomRotate90(),
-                Flip(),
-                Transpose(),
-                OneOf([
-                    IAAAdditiveGaussianNoise(),
-                    GaussNoise(),
-                ], p=0.2),
-                OneOf([
-                    MotionBlur(p=.2),
-                    MedianBlur(blur_limit=3, p=0.1),
-                    Blur(blur_limit=3, p=0.1),
-                ], p=0.2),
-                ShiftScaleRotate(shift_limit=0.0625, scale_limit=0.2, rotate_limit=45, p=0.2),
-                OneOf([
-                    OpticalDistortion(p=0.3),
-                    GridDistortion(p=.1),
-                    IAAPiecewiseAffine(p=0.3),
-                ], p=0.2),
-                OneOf([
-                    IAASharpen(),
-                    IAAEmboss(),
-                    RandomBrightnessContrast(),
-                ], p=0.3),
-            ], p=1)
-        else:
-            aug = Compose([
-                Resize(height=self.size, width=self.size),
-            ], p=1)
+    def six_channel_transform(self, arr):
+
+        aug = Compose([
+            # Resize(height=self.size, width=self.size),
+            RandomRotate90(),
+            Flip(),
+            Transpose(),
+            OneOf([
+                IAAAdditiveGaussianNoise(),
+                GaussNoise(),
+            ], p=0.2),
+            OneOf([
+                MotionBlur(p=.2),
+                MedianBlur(blur_limit=3, p=0.1),
+                Blur(blur_limit=3, p=0.1),
+            ], p=0.2),
+            ShiftScaleRotate(shift_limit=0.0625, scale_limit=0.2, rotate_limit=45, p=0.2),
+            OneOf([
+                OpticalDistortion(p=0.3),
+                GridDistortion(p=.1),
+                IAAPiecewiseAffine(p=0.3),
+            ], p=0.2),
+            OneOf([
+                IAASharpen(),
+                IAAEmboss(),
+                RandomBrightnessContrast(),
+            ], p=0.3),
+        ], p=1)
+
         ret = aug(image=arr)['image']
         return ret
 
@@ -174,10 +171,11 @@ class ImagesDS(D.Dataset):
         if not self.six_channel_augment:
             img = torch.cat([self._load_img_as_tensor(img_path, self.size) for img_path in paths])
         else:
-            six_channel_img = np.array([np.array(Image.open(path)) for path in paths]).transpose([1, 2, 0])
+            six_channel_img = np.array([np.array(T.Resize(self.size)(Image.open(path))) for path in paths]).transpose(
+                [1, 2, 0])
             if self.augmentation:
                 six_channel_img = trick.RandomErasing()(six_channel_img)
-            img = self.six_channel_transform(six_channel_img, self.augmentation)
+                img = self.six_channel_transform(six_channel_img)
             img = T.ToTensor()(img)
 
         if self.mode == 'train':
