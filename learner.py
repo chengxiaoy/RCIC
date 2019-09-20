@@ -628,9 +628,9 @@ def inference(model_path_dict):
         config = Config()
         config.experment = experment
         config.six_channel_aug = False
-        if experment.__contains__('resnext_50'):
+        if model_path_dict[experment].__contains__('resnext_50'):
             config.backbone = "resnext_50"
-        elif experment.__contains__('resnet_50'):
+        elif model_path_dict[experment].__contains__('resnet_50'):
             config.backbone = "resnet_50"
         learner = Learner(config)
         model = learner.build_model(weight_path=model_path_dict[experment], mode='arcface')
