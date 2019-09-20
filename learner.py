@@ -696,7 +696,7 @@ def merge_submission():
 
 if __name__ == "__main__":
     file_paths = {
-        'HEPG2': 'models/stage2_Sep18_15-30-lr1_1e-05_lr2_0.0001_bs_32_ps_448_backbone_resnext_50_head_arcface_six_channel_aug_True_experment_HEPG2_theta.pth',
+        'HEPG2': 'models/stage2_Sep12_02-31-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_HEPG2_theta.pth',
         'HUVEC': 'models/stage2_Sep12_06-09-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_HUVEC_theta.pth',
         'RPE': 'models/stage2_Sep12_12-27-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_RPE_theta.pth',
         'U2OS': 'models/stage2_Sep12_14-44-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False_experment_U2OS_theta.pth'}
