@@ -81,8 +81,8 @@ def get_model(model_name, use_rgb, head_type, classes=1108, pretrained=True):
 
 
 def get_backbone(model_name, use_rgb, classes=1108, pretrained=True):
-    if model_name == 'resnet_18':
-        model = models.resnet18(pretrained=pretrained)
+    if model_name == 'resnet_34':
+        model = models.resnet34(pretrained=pretrained)
     elif model_name == 'resnet_50':
         model = models.resnet50(pretrained=pretrained)
     elif model_name == 'resnet_101':
