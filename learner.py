@@ -37,7 +37,7 @@ class Config():
 
     device_ids = [0, 1]
     use_rgb = False
-    backbone = 'resnet_34'
+    backbone = 'resnet_101'
     head_type = 'arcface'
     classes = 1108
     pic_size = 512
