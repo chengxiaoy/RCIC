@@ -37,7 +37,7 @@ class Config():
 
     device_ids = [0, 1]
     use_rgb = False
-    backbone = 'resnet_34'
+    backbone = 'resnet_50'
     head_type = 'arcface'
     classes = 1108
     pic_size = 512
@@ -45,7 +45,7 @@ class Config():
     stage1_epoch = 50
     stage2_epoch = 50
 
-    stage1_lr = 0.0001
+    stage1_lr = 0.000003
     stage2_lr = 0.0001
     six_channel_aug = False
     experment = 'all'
@@ -78,7 +78,7 @@ class Learner:
         return model
 
     def stage_one(self):
-        model = self.build_model()
+        model = self.build_model(weight_path='models/stage1_Sep02_02-39-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_resnet_50_head_arcface_rgb_False_six_channel_aug_False.pth')
         ds, ds_val, ds_test = get_dataset(size=self.config.pic_size,
                                           six_channel=self.config.six_channel_aug, experment=self.config.experment)
         loader = D.DataLoader(ds, batch_size=self.config.train_batch_size, shuffle=True, num_workers=16)
