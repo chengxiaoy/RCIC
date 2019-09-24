@@ -695,18 +695,18 @@ def merge_submission():
 
 
 if __name__ == "__main__":
-    file_paths = {
-        'HEPG2': 'models/stage2_Sep23_17-44-lr1_3e-06_lr2_0.0001_bs_32_ps_512_backbone_resnet_50_head_arcface_six_channel_aug_False_experment_HEPG2_theta.pth',
-        'HUVEC': 'models/stage2_Sep23_20-39-lr1_3e-06_lr2_0.0001_bs_32_ps_512_backbone_resnet_50_head_arcface_six_channel_aug_False_experment_HUVEC_theta.pth',
-        'RPE': 'models/stage2_Sep24_03-11-lr1_3e-06_lr2_0.0001_bs_32_ps_512_backbone_resnet_50_head_arcface_six_channel_aug_False_experment_RPE_theta.pth',
-        'U2OS': 'models/stage2_Sep24_05-35-lr1_3e-06_lr2_0.0001_bs_32_ps_512_backbone_resnet_50_head_arcface_six_channel_aug_False_experment_U2OS_theta.pth'}
-    #
-    inference(file_paths)
+    # file_paths = {
+    #     'HEPG2': 'models/stage2_Sep23_17-44-lr1_3e-06_lr2_0.0001_bs_32_ps_512_backbone_resnet_50_head_arcface_six_channel_aug_False_experment_HEPG2_theta.pth',
+    #     'HUVEC': 'models/stage2_Sep23_20-39-lr1_3e-06_lr2_0.0001_bs_32_ps_512_backbone_resnet_50_head_arcface_six_channel_aug_False_experment_HUVEC_theta.pth',
+    #     'RPE': 'models/stage2_Sep24_03-11-lr1_3e-06_lr2_0.0001_bs_32_ps_512_backbone_resnet_50_head_arcface_six_channel_aug_False_experment_RPE_theta.pth',
+    #     'U2OS': 'models/stage2_Sep24_05-35-lr1_3e-06_lr2_0.0001_bs_32_ps_512_backbone_resnet_50_head_arcface_six_channel_aug_False_experment_U2OS_theta.pth'}
+    # #
+    # inference(file_paths)
 
 
-    # config = Config()
-    # learner = Learner(config)
-    # model = learner.stage_one()
+    config = Config()
+    learner = Learner(config)
+    model = learner.stage_one()
     # s1_model = learner.build_model(
     #     weight_path='models/stage1_Sep03_07-08-lr1_0.0001_lr2_0.0001_bs_32_ps_448_backbone_densenet201_head_arcface_rgb_False_six_channel_aug_False.pth')
     # learner.confi_evaluate(s1_model)
