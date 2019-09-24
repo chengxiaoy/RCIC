@@ -28,6 +28,8 @@ import math
 rgb_train_csv_path = 'new_train.csv'
 rgb_test_csv_path = 'new_test.csv'
 
+pixel_csv = './data/pixel_stats.csv'
+
 train_csv_path = './data/train.csv'
 test_csv_path = './data/test.csv'
 img_dir = './data'
@@ -50,6 +52,17 @@ def get_dataset(size=512, six_channel=False, train_aug=True, val_aug=False, test
     df_train, df_val = train_test_split(rgb_df, test_size=0.12, stratify=rgb_df.sirna, random_state=42)
     df_test = pd.read_csv(test_csv_path)
 
+    pixel_stats = pd.read_csv(pixel_csv)
+    pixel_info = {}
+    for i in range(len(pixel_stats)):
+        experiment_ = pixel_stats.iloc[i]['experiment']
+        plate = pixel_stats.iloc[i]['plate']
+        well = pixel_stats.iloc[i]['well']
+        site = pixel_stats.iloc[i]['site']
+        channel = pixel_stats.iloc[i]['channel']
+        pic_id = "_".join([experiment_, plate, well, site, channel])
+        pixel_info[pic_id] = [float(pixel_stats.iloc[i]['mean']), float(pixel_stats.iloc[i]['std'])]
+
     if experment != 'all':
         index = np.array([x.split('-')[0] for x in np.array(df_train.id_code)]) == experment
         df_train = df_train.iloc[index]
@@ -60,17 +73,17 @@ def get_dataset(size=512, six_channel=False, train_aug=True, val_aug=False, test
         index = np.array([x.split('-')[0] for x in np.array(df_test.id_code)]) == experment
         df_test = df_test.iloc[index]
 
-    ds = ImagesDS(df_train, img_dir, mode='train', augmentation=train_aug, size=size,
+    ds = ImagesDS(df_train, img_dir, pixel_info, mode='train', augmentation=train_aug, size=size,
                   six_channel=six_channel)
-    ds_val = ImagesDS(df_val, img_dir, mode='train', augmentation=val_aug, size=size,
+    ds_val = ImagesDS(df_val, img_dir, pixel_info, mode='train', augmentation=val_aug, size=size,
                       six_channel=six_channel)
-    ds_test = ImagesDS(df_test, img_dir, mode='test', augmentation=test_aug, size=size,
+    ds_test = ImagesDS(df_test, img_dir, pixel_info, mode='test', augmentation=test_aug, size=size,
                        six_channel=six_channel)
     return ds, ds_val, ds_test
 
 
 class ImagesDS(D.Dataset):
-    def __init__(self, df, img_dir, mode='train', augmentation=False, size=512, six_channel=False, site=1,
+    def __init__(self, df, img_dir, pixel_state, mode='train', augmentation=False, size=512, six_channel=False, site=1,
                  channels=[1, 2, 3, 4, 5, 6]):
         self.records = df.to_records(index=False)
         self.channels = channels
@@ -81,15 +94,29 @@ class ImagesDS(D.Dataset):
         self.augmentation = augmentation
         self.size = size
         self.six_channel_augment = six_channel
+        self.pixel_state = pixel_state
 
     def _load_img_as_tensor(self, file_name, size):
+
+        infos = file_name.split("/")
+        experiment = infos[-3]
+        plate = infos[-2][5:]
+        well = infos[-1].split("_")[0]
+        site = infos[-1].split("_")[1][1:]
+        channel = infos[-1].split("_")[2].split(".")[0][1:]
+        pic_id = "_".join([experiment, plate, well, site, channel])
+
+        mean, std = self.pixel_state[pic_id]
+
         with Image.open(file_name) as img:
             img = T.Resize(size)(img)
 
             if not self.augmentation:
+                img = T.Normalize(mean, std)(img),
                 return T.ToTensor()(img)
             else:
                 transfrom = T.Compose([
+                    T.Normalize(mean, std),
                     T.RandomRotation(90),
                     T.RandomHorizontalFlip(0.5),
                     T.RandomVerticalFlip(0.5),
