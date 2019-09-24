@@ -16,6 +16,7 @@ import sys
 from collections import defaultdict
 from random import sample, choice
 from loss import trick
+from tqdm import tqdm
 
 from albumentations import (
     HorizontalFlip, IAAPerspective, ShiftScaleRotate, CLAHE, RandomRotate90, Resize,
@@ -54,7 +55,7 @@ def get_dataset(size=512, six_channel=False, train_aug=True, val_aug=False, test
 
     pixel_stats = pd.read_csv(pixel_csv)
     pixel_info = {}
-    for i in range(len(pixel_stats)):
+    for i in tqdm(range(len(pixel_stats))):
         experiment_ = pixel_stats.iloc[i]['experiment']
         plate = pixel_stats.iloc[i]['plate']
         well = pixel_stats.iloc[i]['well']
