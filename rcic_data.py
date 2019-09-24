@@ -113,16 +113,18 @@ class ImagesDS(D.Dataset):
             img = T.Resize(size)(img)
 
             if not self.augmentation:
-                img = T.Normalize(mean, std)(img),
-                return T.ToTensor()(img)
+                img = T.ToTensor()(img)
+                return T.Normalize(mean / 255, std / 255)(img),
+
             else:
                 transfrom = T.Compose([
-                    T.Normalize(mean, std),
+
                     T.RandomRotation(90),
                     T.RandomHorizontalFlip(0.5),
                     T.RandomVerticalFlip(0.5),
                     trick.RandomErasing(),
-                    T.ToTensor()
+                    T.ToTensor(),
+                    T.Normalize(mean/255, std/255)
                 ])
 
                 # aug = Compose([
