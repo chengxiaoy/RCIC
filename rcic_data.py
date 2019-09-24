@@ -60,7 +60,7 @@ def get_dataset(size=512, six_channel=False, train_aug=True, val_aug=False, test
         well = pixel_stats.iloc[i]['well']
         site = pixel_stats.iloc[i]['site']
         channel = pixel_stats.iloc[i]['channel']
-        pic_id = "_".join([experiment_, plate, well, site, channel])
+        pic_id = "_".join([experiment_, str(plate), str(well), str(site), str(channel)])
         pixel_info[pic_id] = [float(pixel_stats.iloc[i]['mean']), float(pixel_stats.iloc[i]['std'])]
 
     if experment != 'all':
