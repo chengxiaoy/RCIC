@@ -45,7 +45,7 @@ class Config():
     stage1_epoch = 50
     stage2_epoch = 50
 
-    stage1_lr = 0.000003
+    stage1_lr = 0.0003
     stage2_lr = 0.0001
     six_channel_aug = False
     experment = 'all'
